@@ -1,0 +1,116 @@
+/* Per-scene styles for treeBuilder (scenes 1, 2). Owned by Agent A1. */
+
+/* Decision-region rectangles painted from each leaf's bounding box.
+   Stroke matches background so neighbouring tiles separate cleanly. */
+.tb-region {
+  fill-opacity: 0;
+  stroke: var(--bg);
+  stroke-width: 0.5;
+  shape-rendering: crispEdges;
+  transition: fill-opacity var(--t-med);
+}
+.tb-region.tb-region-on { fill-opacity: 0.18; }
+
+/* In scene 2 each layer is fainter so 5 stacked layers stay legible. */
+.tb-region-layer { fill-opacity: 0; transition: fill-opacity var(--t-med); }
+.tb-region-layer.tb-region-layer-on { fill-opacity: 0.10; }
+.tb-region-layer.tb-region-layer-lift { fill-opacity: 0.30; }
+
+/* The thin black lines that draw the splits (scene 1's growing animation). */
+.tb-split {
+  stroke: var(--ink);
+  stroke-width: 1;
+  stroke-opacity: 0.55;
+  shape-rendering: crispEdges;
+  pointer-events: none;
+}
+.tb-split.tb-split-faded { stroke-opacity: 0.18; }
+
+/* Training points. */
+.tb-point {
+  stroke: var(--bg);
+  stroke-width: 0.7;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Axis-label text. */
+.tb-axis-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  fill: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Readout cells (reuse style.css conventions). */
+.tb-readout-row {
+  display: flex; flex-wrap: wrap;
+  gap: 8px 24px;
+  align-items: baseline;
+  width: 100%;
+}
+.tb-readout-row .tb-headline {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--muted);
+  flex: 1 1 auto;
+}
+
+/* Scene 2: tree thumbnails in the overlay. */
+.tb-tree-tray {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  box-shadow: var(--shadow-soft);
+  font-size: 11px;
+  pointer-events: auto;
+}
+
+.tb-tree-tray-label {
+  align-self: center;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 10px;
+  margin-right: 4px;
+}
+
+.tb-tree-chip {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid var(--rule);
+  background: var(--panel);
+  color: var(--ink);
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+.tb-tree-chip:hover,
+.tb-tree-chip.tb-tree-chip-active {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+/* Caption block sits inside the readout. */
+.tb-caption {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--muted);
+  flex: 1 1 100%;
+}

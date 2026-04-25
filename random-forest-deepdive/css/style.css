@@ -1,0 +1,621 @@
+:root {
+  --bg: #f9f7f1;
+  --ink: #1a1a1a;
+  --ink-soft: #2a2a2a;
+  --muted: #6b6b6b;
+  --rule: #d8d4ca;
+  --panel: #ffffff;
+  --panel-hover: #fdfbf5;
+  --accent: #1a1a1a;
+
+  /* Categorical class palette — 3 penguin species. Reserve a 4th hue for non-identity emphasis. */
+  --c1: #2f6cb1;            /* Adelie — blue */
+  --c2: #b8323a;            /* Chinstrap — red */
+  --c3: #c08a3e;            /* Gentoo — amber */
+  --highlight: #7a5c8c;     /* purple — for "look here" markers that aren't about species */
+
+  /* Functional */
+  --grid-line: rgba(0, 0, 0, 0.06);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04);
+
+  /* Timing */
+  --t-fast: 200ms;
+  --t-med: 400ms;
+}
+
+[data-theme="dark"] {
+  --bg: #181612;
+  --ink: #ece7d9;
+  --ink-soft: #c8c2b3;
+  --muted: #8a8579;
+  --rule: #383530;
+  --panel: #232019;
+  --panel-hover: #2a2620;
+  --accent: #ece7d9;
+
+  --c1: #6ba3d8;
+  --c2: #e07377;
+  --c3: #e5b266;
+  --highlight: #b395c2;
+
+  --grid-line: rgba(236, 231, 217, 0.05);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+html, body { transition: background var(--t-med), color var(--t-med); }
+
+/* Categorical color classes — agents must use these, never inline hex. */
+.cluster-1 { color: var(--c1); }
+.cluster-2 { color: var(--c2); }
+.cluster-3 { color: var(--c3); }
+svg .cluster-1, svg circle.cluster-1, svg path.cluster-1, svg rect.cluster-1 { fill: var(--c1); }
+svg .cluster-2, svg circle.cluster-2, svg path.cluster-2, svg rect.cluster-2 { fill: var(--c2); }
+svg .cluster-3, svg circle.cluster-3, svg path.cluster-3, svg rect.cluster-3 { fill: var(--c3); }
+svg .stroke-cluster-1 { stroke: var(--c1); }
+svg .stroke-cluster-2 { stroke: var(--c2); }
+svg .stroke-cluster-3 { stroke: var(--c3); }
+svg .point { stroke: var(--bg); stroke-width: 0.8; }
+svg .axis text { fill: var(--muted); font-size: 11px; }
+svg .axis line, svg .axis path { stroke: var(--rule); }
+svg .grid line { stroke: var(--grid-line); }
+
+/* Theme toggle button (fixed top-right). */
+.theme-toggle {
+  position: fixed; top: 14px; right: 14px; z-index: 50;
+  font: inherit; font-size: 12px; color: var(--muted);
+  background: var(--bg); border: 1px solid var(--rule); padding: 4px 10px; border-radius: 4px;
+  cursor: pointer; transition: all var(--t-fast);
+}
+.theme-toggle:hover { border-color: var(--ink); color: var(--ink); }
+.theme-toggle .theme-sep { margin: 0 4px; opacity: 0.5; }
+[data-theme="light"] .theme-label-dark { color: var(--ink); font-weight: 500; }
+[data-theme="dark"] .theme-label-light { color: var(--ink); font-weight: 500; }
+
+/* Scene stub (Phase 0 placeholder shown until each scene's agent fills in). */
+.scene-stub {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%;
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif; font-style: italic;
+  color: var(--muted); font-size: 14px;
+  text-align: center;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--rule); }
+a:hover { text-decoration-color: var(--ink); }
+kbd {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 0.85em;
+  padding: 1px 6px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: var(--panel);
+}
+
+/* HERO */
+.hero {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 32px;
+}
+
+.hero h1 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-size: clamp(48px, 7vw, 88px);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  max-width: 18ch;
+  margin-bottom: 16px;
+}
+
+.hero .subtitle {
+  font-size: clamp(18px, 2vw, 22px);
+  color: var(--muted);
+  max-width: 36ch;
+  margin-bottom: 48px;
+}
+
+.hero .hint { color: var(--muted); font-size: 14px; }
+
+/* SCROLLY LAYOUT */
+.scrolly {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(360px, 0.45fr) minmax(0, 0.55fr);
+  gap: 0;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+@media (max-width: 900px) {
+  .scrolly { grid-template-columns: 1fr; }
+}
+
+/* VIZ COLUMN — sticky */
+.viz-column {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  align-self: start;             /* without this, grid's default align-items:stretch fills the 1200vh row and breaks sticky */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px 0 24px 32px;
+  order: 2;
+}
+
+@media (max-width: 900px) {
+  .viz-column { order: 1; height: 70vh; padding: 0; }
+}
+
+.viz-stage {
+  position: relative;
+  flex: 1;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#viz {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.viz-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.viz-overlay > * { pointer-events: auto; }
+.viz-overlay > .senator-card { pointer-events: none; }
+
+.viz-readout {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px 16px;
+  padding: 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  font-size: 13px;
+  min-height: 64px;
+}
+
+.readout-cell { display: flex; flex-direction: column; gap: 2px; }
+.readout-label {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.readout-value {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* PROSE COLUMN */
+.prose-column {
+  order: 1;
+  padding-right: 32px;
+}
+
+.scene {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 0;
+  max-width: 36em;
+}
+
+.scene h2 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-size: clamp(28px, 3vw, 36px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.scene p {
+  margin-bottom: 16px;
+  color: var(--ink-soft);
+}
+
+.scene .hint {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.scene em { font-style: italic; color: var(--ink); }
+.scene strong { font-weight: 600; }
+
+.scene code {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 0.9em;
+  background: var(--panel);
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+}
+
+.vote-yea { color: var(--r); font-weight: 600; }
+.vote-nay { color: var(--d); font-weight: 600; }
+
+.math-block {
+  margin: 24px 0;
+  padding: 24px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  text-align: center;
+  font-size: 1.1em;
+  overflow-x: auto;
+}
+
+.math-block .katex { font-size: 1.15em; }
+
+.scene-outro {
+  min-height: 70vh;
+  text-align: left;
+}
+
+.scene-outro .caption {
+  margin-top: 32px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* SCENE NAV (small dots in corner) */
+.scene-nav {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  background: rgba(255,255,255,0.92);
+  padding: 8px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--rule);
+  z-index: 100;
+}
+
+.scene-nav button {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+  background: var(--panel);
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.scene-nav button:hover { background: var(--bg); }
+.scene-nav button.active {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
+
+/* HOVER PANEL (inside viz overlay during scatter scenes) */
+.senator-card {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255,255,255,0.96);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 14px 16px;
+  width: 240px;
+  font-size: 13px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  pointer-events: none;
+}
+
+.senator-card .photo {
+  display: block;
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  background: #e8e3d7;
+}
+
+.senator-card .name {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.senator-tile { cursor: pointer; }
+
+.senator-card .meta {
+  color: var(--muted);
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.senator-card .pill {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 99px;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-right: 4px;
+}
+
+.senator-card dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+}
+
+.senator-card dt { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+.senator-card dd {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* CONTROLS row beneath the viz stage (only used in scene 8 for the time slider) */
+.viz-controls {
+  margin-top: 12px;
+  display: none;  /* shown only when scene populates it */
+}
+.viz-controls:not(:empty) { display: block; }
+
+/* TIME SLIDER (scene 8) — kept deliberately minimal so the native range widget
+   isn't interfered with. No accent-color, no custom height, no transforms. */
+.time-slider {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+
+.time-slider .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-slider button {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--rule);
+  background: var(--panel);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.time-slider button:hover { background: var(--bg); }
+
+.time-slider input[type=range] {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Custom DIV slider — replaces native <input type="range"> */
+.time-slider .track {
+  flex: 1 1 auto;
+  position: relative;
+  height: 24px;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+}
+
+.time-slider .track::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 6px;
+  margin-top: -3px;
+  background: var(--rule);
+  border-radius: 3px;
+}
+
+.time-slider .track-fill {
+  position: absolute;
+  left: 0; top: 50%;
+  height: 6px;
+  margin-top: -3px;
+  background: var(--ink);
+  border-radius: 3px;
+  width: 0;
+  pointer-events: none;
+}
+
+.time-slider .track-thumb {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  margin-left: -9px;
+  background: var(--ink);
+  border: 2px solid var(--panel);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.time-slider .track:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
+.time-slider .label {
+  flex: 0 0 auto;
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+.time-slider button {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--rule);
+  background: var(--panel);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  pointer-events: auto;
+}
+
+.time-slider input[type=range] {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 24px;
+  accent-color: var(--ink);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.time-slider .label {
+  flex: 0 0 auto;
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* DOTS — colors for SVG */
+.dot { cursor: pointer; transition: stroke-width 120ms ease; }
+.dot.D { fill: var(--d); }
+.dot.R { fill: var(--r); }
+.dot.I { fill: var(--i); }
+.dot.W { fill: var(--w); }
+.dot.F { fill: var(--f); }
+.dot.Other { fill: var(--other); }
+.dot.gray { fill: #9a948a !important; }
+.dot:hover { stroke: var(--ink); stroke-width: 2px; }
+.dot.misclassified { stroke: var(--highlight); stroke-width: 2.5px; }
+.dot.label { font-size: 11px; fill: var(--ink); pointer-events: none; }
+
+/* AXES */
+.axis { color: var(--muted); }
+.axis path, .axis line { stroke: var(--rule); shape-rendering: crispEdges; }
+.axis text {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  fill: var(--muted);
+}
+.axis .tick line { stroke-opacity: 0.3; }
+.axis-label {
+  font-family: inherit;
+  font-size: 12px;
+  fill: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.zero-line {
+  stroke: var(--rule);
+  stroke-dasharray: 2 4;
+  shape-rendering: crispEdges;
+}
+
+/* MATRIX (scene 2) */
+.matrix-cell.yea { fill: var(--r); }
+.matrix-cell.nay { fill: var(--d); }
+.matrix-cell.abs { fill: #f0ece4; }
+
+/* SCREE bars (scene 9) */
+.scree-bar { fill: var(--ink); }
+.scree-bar.highlight { fill: var(--r); }
+.scree-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-size: 16px;
+  font-weight: 500;
+  fill: var(--ink);
+}
+.scree-pct {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  fill: var(--muted);
+}
+
+/* RF importances (scene 12) */
+.imp-bar { fill: var(--ink); }
+.imp-bar.procedural { fill: var(--highlight); }
+.imp-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--ink);
+}
+.imp-pct {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  fill: var(--muted);
+}
+.imp-tooltip {
+  background: rgba(255,255,255,0.96);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-size: 12px;
+  width: 280px;
+  position: absolute;
+  pointer-events: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+/* K-MEANS centroids */
+.centroid {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+}
+
+/* MATH (scene 5) */
+.math-rotation-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--muted);
+}

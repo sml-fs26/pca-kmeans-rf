@@ -1,0 +1,342 @@
+/* Per-scene styles for importance (scenes 10, 11, 12). Owned by Agent A5. */
+
+/* ========================================================================== */
+/* Shared                                                                     */
+/* ========================================================================== */
+
+.imp-panel-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-size: 14px;
+  font-weight: 500;
+  fill: var(--ink);
+}
+
+.imp-panel-subtitle {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--muted);
+}
+
+.imp-axis text {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  fill: var(--muted);
+}
+.imp-axis path,
+.imp-axis line { stroke: var(--rule); }
+
+.imp-axis-label-rot,
+.imp-axis-label-flat {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  fill: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.imp-caption-row {
+  display: flex; flex-wrap: wrap;
+  gap: 8px 24px;
+  align-items: baseline;
+  width: 100%;
+}
+.imp-caption {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--muted);
+  flex: 1 1 100%;
+}
+.imp-caption strong { color: var(--ink); font-weight: 600; }
+
+
+/* ========================================================================== */
+/* Scene 10 — Gini bars + permutation comparison                              */
+/* ========================================================================== */
+
+.imp-bar-track {
+  fill: var(--rule);
+  fill-opacity: 0.25;
+}
+
+.imp-bar {
+  fill: var(--ink);
+  transition: fill var(--t-fast);
+}
+.imp-bar.imp-bar-dominant {
+  fill: var(--highlight);
+}
+
+.imp-bar-perm {
+  fill: var(--muted);
+  fill-opacity: 0.85;
+}
+
+.imp-bar-label-left {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  fill: var(--ink-soft);
+}
+
+.imp-bar-value {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Slider control beneath the viz. */
+.imp-control {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+.imp-control-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.imp-control input[type=range] {
+  flex: 1 1 auto;
+  min-width: 140px;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+.imp-control-value {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 13px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  min-width: 6ch;
+  text-align: right;
+}
+
+
+/* ========================================================================== */
+/* Scene 11 — Waterfall                                                       */
+/* ========================================================================== */
+
+.imp-wf-query {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 10px 14px;
+  pointer-events: none;
+}
+
+.imp-wf-query-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.imp-wf-query-title {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.imp-wf-query-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px 16px;
+}
+
+.imp-wf-query-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.imp-wf-query-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.imp-wf-query-value {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 14px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Waterfall bars. */
+.imp-wf-rect {
+  transition: opacity var(--t-fast);
+}
+.imp-wf-rect-abs {
+  /* class color from cluster-N */
+  fill-opacity: 0.95;
+}
+.imp-wf-rect-pos {
+  /* contributes positively → species color */
+  fill-opacity: 0.55;
+}
+.imp-wf-rect-neg {
+  /* contributes negatively → muted */
+  fill: var(--muted);
+  fill-opacity: 0.40;
+}
+
+.imp-wf-col-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  fill: var(--muted);
+}
+
+.imp-wf-col-value {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.imp-wf-connector {
+  stroke: var(--ink);
+  stroke-opacity: 0.45;
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  shape-rendering: crispEdges;
+}
+
+/* Class-toggle chips for the waterfall. Lives inline inside the query-strip
+   header on the right so it doesn't overlap the rightmost waterfall columns. */
+.imp-wf-tray {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.imp-wf-tray-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 4px;
+}
+
+.imp-wf-chip {
+  border: 1px solid var(--rule);
+  background: var(--panel);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+}
+.imp-wf-chip:hover { border-color: var(--ink); }
+.imp-wf-chip.imp-wf-chip-active {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+
+/* ========================================================================== */
+/* Scene 12 — Feature × Depth heatmap                                         */
+/* ========================================================================== */
+
+.imp-hm-cell {
+  cursor: crosshair;
+  transition: stroke var(--t-fast);
+}
+
+.imp-hm-cell-text {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  fill: var(--ink);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.imp-hm-cell-text.imp-hm-cell-text-light {
+  fill: var(--bg);
+}
+
+.imp-hm-row-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  fill: var(--ink-soft);
+}
+
+.imp-hm-col-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.imp-hm-legend {
+  stroke: var(--rule);
+  stroke-width: 0.5;
+}
+
+.imp-hm-legend-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 10px;
+  fill: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.imp-hm-legend-tick {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  fill: var(--muted);
+}
+
+/* Tooltip floats over the stage. */
+.imp-hm-tooltip {
+  position: absolute;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  width: 200px;
+  box-shadow: var(--shadow-soft);
+  pointer-events: none;
+  transition: opacity var(--t-fast);
+  z-index: 6;
+}
+
+.imp-hm-tt-feature {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--ink);
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.imp-hm-tt-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  padding: 1px 0;
+}
+.imp-hm-tt-row span:first-child { color: var(--muted); }

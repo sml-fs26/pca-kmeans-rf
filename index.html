@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SML visualizations</title>
+  <meta name="description" content="Browser-only educational visualizations for the ETH Statistical Machine Learning course.">
+  <style>
+    :root {
+      --bg: #f9f7f1;
+      --ink: #1a1a1a;
+      --ink-soft: #2a2a2a;
+      --muted: #6b6b6b;
+      --rule: #d8d4ca;
+      --panel: #ffffff;
+      --accent: #1a1a1a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+      font-size: 17px;
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 80px 32px 48px;
+    }
+
+    header {
+      margin-bottom: 56px;
+    }
+
+    h1 {
+      font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 500;
+      letter-spacing: -0.025em;
+      line-height: 1.05;
+      margin-bottom: 12px;
+    }
+
+    .lede {
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 36em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      display: block;
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 24px 28px 22px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 120ms ease, transform 120ms ease;
+    }
+
+    .card:hover {
+      border-color: var(--ink);
+      transform: translateY(-1px);
+    }
+
+    .card h2 {
+      font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+      font-size: 24px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      color: var(--ink-soft);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .card .meta {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-family: "SF Mono", "Menlo", monospace;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--rule);
+    }
+
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    footer a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>SML visualizations.</h1>
+      <p class="lede">Browser-only explainers for the ETH Statistical Machine Learning course. Each viz lives in its own folder; click a card to open it.</p>
+    </header>
+
+    <div class="grid">
+      <a class="card" href="congress-story/">
+        <h2>The Senate, projected.</h2>
+        <p>PCA applied to 175 years of US Senate roll-call votes. A scrollytelling tour of polarization through eigenvalues — including the year the second principal component spiked.</p>
+        <div class="meta">PCA · scrollytelling</div>
+      </a>
+
+      <a class="card" href="kmeans-deepdive/">
+        <h2>k-means, deeply.</h2>
+        <p>An interactive walk through Lloyd&rsquo;s algorithm: what it minimizes, why initialization matters, and what the partition of space actually looks like.</p>
+        <div class="meta">k-means · click-step</div>
+      </a>
+
+      <a class="card" href="movies-pca/">
+        <h2>PCA from movie ratings.</h2>
+        <p>How two principal components extract latent taste dimensions from a movies&times;users rating matrix — and what each axis comes to mean.</p>
+        <div class="meta">PCA · click-step</div>
+      </a>
+
+      <a class="card" href="eigenfaces-pca/">
+        <h2>Eigenfaces.</h2>
+        <p>PCA on a face dataset. Reconstructions from the first <em>k</em> components, plus what each principal component looks like as a face.</p>
+        <div class="meta">PCA · interactive</div>
+      </a>
+
+      <a class="card" href="random-forest-deepdive/">
+        <h2>The forest grows.</h2>
+        <p>Random forests built up one tree at a time — bootstrapping, feature subsampling, the OOB error trace. Watch the variance shrink.</p>
+        <div class="meta">Random forest · click-step</div>
+      </a>
+    </div>
+
+    <footer>
+      <span>ETH SML &mdash; teaching visualizations.</span>
+      <a href="https://github.com/sml-fs26/pca-kmeans-rf">Source on GitHub</a>
+    </footer>
+  </main>
+</body>
+</html>

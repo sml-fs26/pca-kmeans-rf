@@ -1,0 +1,79 @@
+# Deploy the SML viz collection to GitHub Pages.
+#
+# Triggers on push to main (and manual dispatch). Resolves the vendor
+# symlinks in sibling viz to real file copies so each viz is self-contained
+# in the deployed artifact, then strips dev-only folders (.venv, __pycache__,
+# data/raw) defensively before upload.
+#
+# Setup: in GitHub repo Settings → Pages → Source, choose "GitHub Actions".
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve vendor symlinks to real file copies
+        # Three of the sibling viz symlink their vendor/ contents to
+        # congress-story/vendor/. GitHub Pages serves better when each
+        # viz has its own self-contained vendor/ folder.
+        run: |
+          set -e
+          for d in kmeans-deepdive movies-pca eigenfaces-pca random-forest-deepdive; do
+            if [ ! -d "$d" ]; then continue; fi
+            for link in "$d"/vendor/*; do
+              if [ -L "$link" ]; then
+                target=$(readlink "$link")
+                resolved="$(dirname "$link")/$target"
+                rm "$link"
+                cp -RL "$resolved" "$link"
+                echo "resolved: $link → $target"
+              fi
+            done
+          done
+
+      - name: Defensive cleanup
+        # Remove anything that shouldn't ship even if .gitignore missed it.
+        run: |
+          find . -type d -name ".venv"        -prune -exec rm -rf {} + 2>/dev/null || true
+          find . -type d -name "__pycache__"  -prune -exec rm -rf {} + 2>/dev/null || true
+          find . -type d -path "*/data/raw"   -prune -exec rm -rf {} + 2>/dev/null || true
+          find . -type d -name "node_modules" -prune -exec rm -rf {} + 2>/dev/null || true
+          # Drop the .claude skills folder; not part of the deployed site.
+          rm -rf .claude
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

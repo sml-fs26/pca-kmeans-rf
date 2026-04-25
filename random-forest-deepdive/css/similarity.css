@@ -1,0 +1,180 @@
+/* Per-scene styles for similarity (scene 9). Owned by Agent A4. */
+
+/* ----------------------------------------------------------------------
+ * Two extra cluster colors (--c4, --c5) — exclusive to scene 9. The
+ * categorical 3-color palette in style.css covers Adelie/Chinstrap/Gentoo;
+ * here we have 5 tree clusters so we extend with purple + green.
+ *
+ * IMPORTANT: these two colors must NOT be reused for non-cluster meanings
+ * elsewhere on the page. (Note: --c4 happens to share purple with --highlight
+ * which is fine since neither is used together with the other in this scene.)
+ * -------------------------------------------------------------------- */
+:root {
+  --c4: #7a5c8c;            /* purple — cluster 4 */
+  --c5: #4a8b6b;            /* green  — cluster 5 */
+}
+[data-theme="dark"] {
+  --c4: #b395c2;
+  --c5: #7fbf9a;
+}
+
+.cluster-4 { color: var(--c4); }
+.cluster-5 { color: var(--c5); }
+svg .cluster-4, svg circle.cluster-4, svg path.cluster-4, svg rect.cluster-4 { fill: var(--c4); }
+svg .cluster-5, svg circle.cluster-5, svg path.cluster-5, svg rect.cluster-5 { fill: var(--c5); }
+svg .stroke-cluster-4 { stroke: var(--c4); }
+svg .stroke-cluster-5 { stroke: var(--c5); }
+
+/* ----------------------------------------------------------------------
+ * Caption strip above the two panels.
+ * -------------------------------------------------------------------- */
+.sm-caption {
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-size: 14px;
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+.sm-caption strong { font-weight: 600; color: var(--ink); }
+
+.sm-cluster-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.sm-badge {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: var(--panel);
+  border: 1px solid currentColor;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.sm-badge.cluster-1 { color: var(--c1); border-color: var(--c1); }
+.sm-badge.cluster-2 { color: var(--c2); border-color: var(--c2); }
+.sm-badge.cluster-3 { color: var(--c3); border-color: var(--c3); }
+.sm-badge.cluster-4 { color: var(--c4); border-color: var(--c4); }
+.sm-badge.cluster-5 { color: var(--c5); border-color: var(--c5); }
+
+/* ----------------------------------------------------------------------
+ * Panel chrome
+ * -------------------------------------------------------------------- */
+.sm-panel-bg {
+  fill: var(--panel);
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.sm-panel-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  fill: var(--muted);
+}
+
+.sm-axis path,
+.sm-axis line {
+  stroke: var(--rule);
+  shape-rendering: crispEdges;
+}
+.sm-axis text {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 9.5px;
+  fill: var(--muted);
+}
+.sm-axis-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  fill: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ----------------------------------------------------------------------
+ * MDS panel (left)
+ * -------------------------------------------------------------------- */
+.sm-hull {
+  fill: currentColor;
+  fill-opacity: 0.05;
+  stroke: currentColor;
+  stroke-opacity: 0.35;
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  cursor: pointer;
+  transition: fill-opacity var(--t-fast), stroke-opacity var(--t-fast);
+}
+.sm-hull.cluster-1 { color: var(--c1); fill: var(--c1); stroke: var(--c1); }
+.sm-hull.cluster-2 { color: var(--c2); fill: var(--c2); stroke: var(--c2); }
+.sm-hull.cluster-3 { color: var(--c3); fill: var(--c3); stroke: var(--c3); }
+.sm-hull.cluster-4 { color: var(--c4); fill: var(--c4); stroke: var(--c4); }
+.sm-hull.cluster-5 { color: var(--c5); fill: var(--c5); stroke: var(--c5); }
+.sm-hull.sm-hull-hover { fill-opacity: 0.12; stroke-opacity: 0.7; }
+.sm-hull.sm-hull-active { fill-opacity: 0.16; stroke-opacity: 0.9; stroke-width: 1.5; }
+
+.sm-point {
+  stroke: var(--bg);
+  stroke-width: 1;
+  cursor: pointer;
+  transition: r var(--t-fast), opacity var(--t-fast);
+}
+.sm-point.sm-point-dim { opacity: 0.25; }
+.sm-point.sm-point-active {
+  stroke: var(--ink);
+  stroke-width: 2;
+  r: 7;
+}
+
+/* ----------------------------------------------------------------------
+ * Right panel: representative tree boundary
+ * -------------------------------------------------------------------- */
+.sm-cell {
+  fill-opacity: 0.45;
+  shape-rendering: crispEdges;
+}
+.sm-cell.cluster-1 { fill: var(--c1); }
+.sm-cell.cluster-2 { fill: var(--c2); }
+.sm-cell.cluster-3 { fill: var(--c3); }
+
+.sm-train {
+  stroke: var(--bg);
+  stroke-width: 0.7;
+}
+
+.sm-placeholder {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  fill: var(--muted);
+}
+
+/* ----------------------------------------------------------------------
+ * Tooltip
+ * -------------------------------------------------------------------- */
+.sm-tooltip {
+  position: absolute;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  color: var(--ink);
+  pointer-events: none;
+  box-shadow: var(--shadow-soft);
+  white-space: nowrap;
+  z-index: 6;
+}

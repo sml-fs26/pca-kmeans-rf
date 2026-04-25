@@ -1,0 +1,260 @@
+/* Per-scene styles for marblesMtry (scenes 3, 4). Owned by Agent A2. */
+
+/* ------------------------------------------------------------------ */
+/* Shared                                                              */
+/* ------------------------------------------------------------------ */
+
+.mm-axis-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 10px;
+  fill: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mm-section-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 12px;
+  fill: var(--muted);
+}
+
+.mm-caption {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--muted);
+  flex: 1 1 100%;
+}
+
+/* ------------------------------------------------------------------ */
+/* Scene 3 — bootstrap                                                 */
+/* ------------------------------------------------------------------ */
+
+.mm-marble {
+  fill: var(--ink-soft);
+  stroke: var(--bg);
+  stroke-width: 0.6;
+}
+.mm-marble.mm-marble-drawn {
+  /* marbles still in the bag that have been drawn at least once stay neutral */
+  fill: var(--muted);
+}
+.mm-marble.mm-marble-oob {
+  fill: var(--panel);
+  stroke: var(--highlight);
+  stroke-width: 1.6;
+}
+
+.mm-marble-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 7px;
+  fill: var(--bg);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.mm-marble-label.mm-marble-label-oob {
+  fill: var(--highlight);
+}
+
+.mm-tray-marble {
+  fill: var(--muted);
+  stroke: var(--bg);
+  stroke-width: 0.5;
+}
+
+.mm-bag-outline {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.mm-tray-outline {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.mm-counter-value {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 22px;
+  font-weight: 500;
+  fill: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.mm-counter-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  fill: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Inset chart: fraction-unique vs draw count */
+
+.mm-chart-axis path,
+.mm-chart-axis line {
+  stroke: var(--rule);
+  shape-rendering: crispEdges;
+}
+.mm-chart-axis text {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 9px;
+  fill: var(--muted);
+}
+
+.mm-chart-curve {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+.mm-chart-asymptote {
+  stroke: var(--highlight);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  fill: none;
+}
+
+.mm-chart-asymptote-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 9px;
+  fill: var(--highlight);
+}
+
+.mm-chart-progress-dot {
+  fill: var(--ink);
+}
+
+/* ------------------------------------------------------------------ */
+/* Scene 4 — mtry                                                      */
+/* ------------------------------------------------------------------ */
+
+/* Feature chips above the tree */
+
+.mm-chip-strip {
+  /* SVG <g> styled — no background */
+}
+
+.mm-chip-rect {
+  fill: var(--panel);
+  stroke: var(--rule);
+  stroke-width: 1;
+  transition: fill var(--t-fast), stroke var(--t-fast);
+}
+.mm-chip-rect.mm-chip-on {
+  fill: var(--highlight);
+  stroke: var(--highlight);
+  fill-opacity: 0.18;
+  stroke-opacity: 1;
+}
+
+.mm-chip-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  fill: var(--ink-soft);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  transition: fill var(--t-fast);
+}
+.mm-chip-label.mm-chip-label-on {
+  fill: var(--highlight);
+  font-weight: 600;
+}
+
+/* Tree edges and nodes */
+
+.mm-edge {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.mm-node-internal {
+  fill: var(--panel);
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+}
+
+.mm-node-leaf {
+  stroke: var(--bg);
+  stroke-width: 1;
+}
+
+.mm-node-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 9.5px;
+  fill: var(--ink);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.mm-node-label-sub {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 8.5px;
+  fill: var(--muted);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+.mm-leaf-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 8.5px;
+  fill: var(--bg);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* Slider control (replicates time-slider conventions, simpler) */
+
+.mm-slider {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+
+.mm-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mm-slider-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.mm-slider-value {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 14px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  min-width: 6ch;
+}
+
+.mm-slider input[type=range] {
+  flex: 1 1 auto;
+  min-width: 120px;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+
+/* Readout caption strip */
+
+.mm-readout-row {
+  display: flex; flex-wrap: wrap;
+  gap: 8px 24px;
+  align-items: baseline;
+  width: 100%;
+}
