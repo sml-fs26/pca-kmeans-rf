@@ -1,0 +1,71 @@
+/* Scene 9 — Takeaways */
+
+.s9-layout {
+  align-items: center;
+  justify-content: center;
+}
+
+.s9-stack {
+  width: 100%;
+  max-width: 980px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+}
+
+.s9-heading {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.s9-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+@media (max-width: 720px) { .s9-grid { grid-template-columns: 1fr; } }
+
+.s9-card {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 16px 18px;
+  position: relative;
+}
+
+.s9-num {
+  font-family: "SF Mono", "Menlo", monospace;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+}
+
+.s9-card-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-size: 17px;
+  margin-bottom: 6px;
+  line-height: 1.25;
+}
+
+.s9-card-body {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.s9-closing {
+  text-align: center;
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ink-soft);
+  margin: 0 auto 16px;
+  max-width: 60ch;
+}
+
+.s9-back { text-align: center; }

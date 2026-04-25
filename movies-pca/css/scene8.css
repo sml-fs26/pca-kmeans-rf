@@ -1,0 +1,107 @@
+/* Scene 8 — Everyone projected (heatmap → PCA scatter animation) */
+
+.s8-layout {
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.s8-stack {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 10px;
+  min-height: 0;
+}
+
+.s8-header { text-align: left; padding: 0 4px; }
+.s8-heading { margin-bottom: 4px; }
+.s8-lede { color: var(--ink-soft); font-size: 14px; max-width: 80ch; }
+
+.s8-svg-wrap {
+  flex: 1;
+  min-height: 0;
+  padding: 4px;
+}
+
+.s8-svg { width: 100%; height: 100%; }
+
+.s8-svg .s8-row-label,
+.s8-svg .s8-col-label {
+  font-family: -apple-system, "Inter", sans-serif;
+  font-size: 11px;
+  fill: var(--ink-soft);
+}
+
+.s8-svg .s8-axis {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.s8-svg .s8-axis-end {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  fill: var(--muted);
+}
+
+.s8-svg .s8-plane-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  fill: var(--muted);
+}
+
+.s8-svg .s8-variance-text {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 12px;
+  fill: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.s8-svg .s8-ball-label {
+  font-family: -apple-system, "Inter", sans-serif;
+  font-size: 11px;
+  fill: var(--ink);
+  font-weight: 500;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.s8-svg circle.s8-ball.cluster-1 { fill: var(--c1); }
+.s8-svg circle.s8-ball.cluster-2 { fill: var(--c2); }
+.s8-svg circle.s8-ball.cluster-3 { fill: var(--c3); }
+.s8-svg circle.s8-ball.cluster-4 { fill: var(--c4); }
+
+.s8-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px;
+  flex-wrap: wrap;
+}
+
+.s8-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.s8-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.s8-legend-swatch {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}

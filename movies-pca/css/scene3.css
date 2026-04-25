@@ -1,0 +1,22 @@
+/* Scene 3 — Shuffled matrix */
+
+.s3-layout { gap: 28px; }
+.s3-viz-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.s3-viz-wrap { flex: 1; min-height: 0; padding: 8px; }
+.s3-text { padding: 12px 0; }
+
+.s3-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.s3-legend-row { display: flex; align-items: center; gap: 6px; }
+.s3-legend-swatch {
+  width: 18px; height: 14px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  display: inline-block;
+}

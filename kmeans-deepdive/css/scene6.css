@@ -1,0 +1,135 @@
+/* Scene 6 — Convergence check. Old/new centroid arrows + warning callout. */
+
+.s6-text { padding-left: 8px; }
+
+.s6-text h2 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(22px, 2vw, 28px);
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.s6-step-pill {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.s6-delta-table {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 14px;
+  color: var(--ink);
+  margin: 6px 0 4px;
+  font-variant-numeric: tabular-nums;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 14px;
+}
+.s6-delta-table .lbl {
+  color: var(--muted);
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+}
+.s6-delta-table .val.is-max {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.s6-stoprule {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  margin-top: 8px;
+}
+.s6-stoprule .eps {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 12.5px;
+  color: var(--muted);
+  display: block;
+  margin-top: 4px;
+}
+
+.callout.warning {
+  border-left-color: var(--c2);
+}
+.callout.warning .callout-title {
+  color: var(--c2);
+}
+
+/* Voronoi: old partition (before-update) shown underneath, dashed and faint,
+ * so the student can see the partition shift directly tied to the Δ values. */
+svg .voronoi-cell.previous {
+  fill-opacity: 0.03;
+  stroke-dasharray: 2 2;
+  stroke-opacity: 0.55;
+}
+
+/* Old (ghost) centroid in scene 6. */
+svg .centroid.s6-old {
+  opacity: 0.38;
+}
+
+/* New centroids highlighted. */
+svg .centroid.s6-new { opacity: 1; }
+
+/* Arrow from old to new centroid. */
+svg .s6-arrow {
+  stroke: var(--accent);
+  stroke-width: 0.6;
+  fill: none;
+  opacity: 0.7;
+}
+svg .s6-arrow.is-max {
+  stroke-width: 1.2;
+  opacity: 1;
+}
+svg .s6-arrow-head {
+  fill: var(--accent);
+  opacity: 0.7;
+}
+svg .s6-arrow-head.is-max { opacity: 1; }
+
+svg .s6-delta-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 3px;
+  fill: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+svg .s6-delta-label.is-max { font-weight: 700; }
+
+/* Inset J(t) plot. */
+svg .s6-jplot-axis {
+  stroke: var(--rule);
+  stroke-width: 0.3;
+  fill: none;
+}
+svg .s6-jplot-line {
+  stroke: var(--inertia-line);
+  stroke-width: 0.6;
+  fill: none;
+}
+svg .s6-jplot-dot {
+  fill: var(--inertia-line);
+}
+svg .s6-jplot-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 2.5px;
+  fill: var(--muted);
+}
+svg .s6-jplot-frame {
+  fill: var(--panel);
+  stroke: var(--rule);
+  stroke-width: 0.3;
+}
+svg .s6-jplot-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 2.6px;
+  fill: var(--muted);
+}

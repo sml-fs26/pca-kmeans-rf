@@ -1,0 +1,88 @@
+/* Scene 5 — Update step. Spring lines + ghost centroids. */
+
+.s5-text { padding-left: 8px; }
+
+.s5-text h2 {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(22px, 2vw, 28px);
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.s5-rule {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  color: var(--ink-soft);
+  font-size: 15px;
+  margin-top: 6px;
+}
+
+.s5-step-pill {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.s5-counter {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 14px;
+  color: var(--ink);
+  margin: 8px 0;
+  font-variant-numeric: tabular-nums;
+}
+.s5-counter .label {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+  margin-right: 6px;
+  font-size: 13px;
+}
+
+.s5-j-compare {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 14px;
+  color: var(--ink);
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.s5-j-compare .label {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+  margin-right: 6px;
+}
+
+/* Faded points (during cluster spotlight). */
+svg .point.s5-faded { opacity: 0.2; }
+svg .point.s5-vivid { opacity: 1; }
+
+/* Old centroid ghost. */
+svg .centroid.s5-ghost {
+  opacity: 0.32;
+}
+
+/* The "+" cross marking the new mean position before the slide. */
+svg .s5-mean-cross line { stroke-linecap: round; }
+
+/* Spring lines pulling on the centroid. */
+svg .s5-spring {
+  stroke-width: 0.5;
+  fill: none;
+  opacity: 0.55;
+}
+svg .s5-spring.cluster-1 { stroke: var(--c1); }
+svg .s5-spring.cluster-2 { stroke: var(--c2); }
+svg .s5-spring.cluster-3 { stroke: var(--c3); }
+
+/* Distance lines from points to (new) assigned centroid in step 5. */
+svg .distance-line.s5-resid {
+  stroke: var(--distance-line);
+  stroke-width: 0.4;
+  opacity: 0.55;
+  stroke-dasharray: 2 2;
+}

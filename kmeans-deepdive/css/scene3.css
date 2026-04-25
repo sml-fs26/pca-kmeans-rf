@@ -1,0 +1,67 @@
+/* Scene 3 — Initialization side-by-side comparison. */
+
+.s3-intro {
+  max-width: 70ch;
+  margin: 0 auto 18px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.s3-h2 {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.s3-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: stretch;
+  margin: 0 auto;
+  max-width: 1100px;
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .s3-compare { grid-template-columns: 1fr; }
+}
+
+.s3-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.s3-card-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+.s3-card .viz-wrap { min-height: 300px; flex: 1; }
+.s3-card-caption {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 13px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.s3-card-caption .cap-label {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+  margin-right: 6px;
+  font-size: 13px;
+}
+
+.s3-explainer {
+  max-width: 70ch;
+  margin: 18px auto 0;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.s3-foreshadow {
+  max-width: 60ch;
+  margin: 14px auto 0;
+}

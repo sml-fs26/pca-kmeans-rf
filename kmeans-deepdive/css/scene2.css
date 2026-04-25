@@ -1,0 +1,53 @@
+/* Scene 2 — Objective J
+ * Local styles for the substep narrative column and animated lines. */
+
+.s2-narrative {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.s2-step-text {
+  transition: opacity var(--t-med);
+  min-height: 220px;
+}
+
+.s2-step-text.fading {
+  opacity: 0;
+}
+
+.s2-step-pill {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.s2-partial-sum {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 14px;
+  color: var(--ink);
+  margin-top: 10px;
+}
+.s2-partial-sum .ps-label {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+  margin-right: 8px;
+  font-size: 13px;
+}
+
+/* Animated dashed line draw — D3 controls stroke-dashoffset. */
+svg .distance-line.s2-anim {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+
+/* Scene 2 — neutral points before assignment is revealed */
+svg .point.s2-neutral {
+  fill: var(--ink-soft);
+}

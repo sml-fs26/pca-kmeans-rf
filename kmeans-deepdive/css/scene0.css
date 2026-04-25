@@ -1,0 +1,97 @@
+/* Scene 0 — title hero. Centered editorial column with a teaser visual. */
+
+.scene[data-scene="0"] {
+  padding: 24px 56px;
+  overflow-y: auto;
+}
+
+.hero-layout {
+  align-items: start;
+  justify-items: center;
+}
+
+.hero-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 760px;
+  width: 100%;
+  padding: 8px 0 32px;
+}
+
+.hero-overtitle {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+  max-width: none;
+}
+
+.hero-title {
+  font-size: clamp(56px, 7vw, 96px);
+  line-height: 1;
+  margin: 0 0 14px 0;
+  letter-spacing: -0.03em;
+}
+
+.hero-subtitle {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  max-width: 36ch;
+  margin: 0 auto 22px auto;
+}
+
+.hero-viz {
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 1 / 1;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 6px auto 14px auto;
+  box-shadow: var(--shadow-soft);
+}
+
+.hero-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The hero crops the bottom half of the [0,100] canvas: the three converged
+ * blobs sit in roughly y in [20, 80] so we widen vertically to use full panel.
+ * Achieved via viewBox/preserveAspectRatio handled in JS. */
+
+.hero-caption {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 13.5px;
+  color: var(--muted);
+  margin: 0 auto 18px auto;
+  max-width: 48ch;
+}
+
+.hero-cta {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 4px;
+  max-width: none;
+}
+.hero-cta kbd {
+  font-size: 12px;
+  margin: 0 2px;
+}
+
+/* Compact on shorter viewports. */
+@media (max-height: 760px) {
+  .hero-title { font-size: clamp(44px, 5.5vw, 72px); }
+  .hero-subtitle { font-size: 19px; margin-bottom: 16px; }
+  .hero-viz { max-width: 560px; }
+}

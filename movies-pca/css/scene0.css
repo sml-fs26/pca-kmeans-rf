@@ -1,0 +1,58 @@
+/* Scene 0 — Title hero */
+
+.scene-hero { padding: 0 !important; }
+
+.hero-layout {
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 980px;
+  padding: 24px 32px;
+  width: 100%;
+}
+
+.hero-overtitle {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.hero-title {
+  margin-bottom: 18px;
+}
+
+.hero-subtitle {
+  color: var(--ink-soft);
+  font-size: clamp(15px, 1.4vw, 18px);
+  max-width: 56ch;
+  margin: 0 auto 22px;
+  line-height: 1.45;
+}
+
+.hero-teaser {
+  width: 100%;
+  max-width: 540px;
+  height: 260px;
+  margin: 6px auto 18px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--panel);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-cta {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}

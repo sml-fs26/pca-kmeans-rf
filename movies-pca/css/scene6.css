@@ -1,0 +1,80 @@
+/* Scene 6 — One viewer in 2D */
+
+.s6-layout { gap: 24px; }
+.s6-left, .s6-right {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  gap: 10px;
+}
+
+.s6-heat-wrap { flex: 1; min-height: 0; padding: 6px; }
+.s6-heat-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.s6-plane-wrap {
+  flex: 1;
+  min-height: 0;
+  padding: 8px;
+}
+
+.s6-plane-svg { width: 100%; height: 100%; }
+
+.s6-plane-svg .s6-axis-label {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 12px;
+  fill: var(--muted);
+}
+
+.s6-plane-svg .s6-point-label {
+  font-family: -apple-system, "Inter", sans-serif;
+  font-size: 11px;
+  fill: var(--ink);
+  font-weight: 500;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.s6-explain { padding: 0 8px; }
+
+.s6-formula { margin: 0; }
+.s6-formula .katex-display { margin: 4px 0; }
+
+.s6-prompt {
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.s6-current {
+  font-size: 14px;
+  margin: 4px 0 8px;
+  color: var(--ink);
+}
+
+.s6-projvals {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+.s6-projrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+}
+.s6-projlabel { color: var(--muted); }
+.s6-projval { color: var(--ink); font-size: 14px; }

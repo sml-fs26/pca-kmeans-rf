@@ -1,0 +1,69 @@
+/* Scene 4 — Interactive sort */
+
+.s4-layout { gap: 28px; }
+.s4-viz-col { display: flex; flex-direction: column; min-width: 0; min-height: 0; gap: 10px; }
+.s4-viz-wrap { flex: 1; min-height: 0; padding: 8px; }
+
+.s4-control-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 4px 0;
+}
+
+.s4-clarity-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  margin-left: 6px;
+}
+
+.s4-clarity-label {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.s4-clarity-bar {
+  flex: 1;
+  height: 8px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--bg);
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.s4-clarity-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--c1), var(--c4), var(--c2));
+  width: 0%;
+  transition: width 320ms ease-out;
+}
+
+.s4-clarity-val {
+  font-size: 12px;
+  color: var(--ink-soft);
+  width: 36px;
+  text-align: right;
+}
+
+.s4-clarity-wrap.s4-clarity-done .s4-clarity-val { color: var(--c5, #4a8b6b); font-weight: 600; }
+
+.s4-text { padding: 12px 0; }
+
+.s4-rules {
+  margin: 8px 0 14px 18px;
+  padding: 0;
+  color: var(--ink-soft);
+}
+.s4-rules li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.s4-tip { font-size: 13px; }

@@ -1,0 +1,209 @@
+/* Scene 8 — Initialization sensitivity.
+ * Two equal-width viz cards side-by-side, with a header row above and a
+ * comparison-J chart + callout below. */
+
+.scene[data-scene="8"] {
+  padding: 24px 40px;
+  overflow: hidden;
+}
+
+.s8-stack {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  height: 100%;
+}
+
+.s8-header {
+  text-align: center;
+  padding: 0 8px;
+}
+
+.s8-heading {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-size: clamp(22px, 2.6vw, 32px);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.s8-intro {
+  font-size: 14px;
+  color: var(--muted);
+  font-style: italic;
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  margin: 0;
+  max-width: 70ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.s8-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .s8-split { grid-template-columns: 1fr; }
+}
+
+.s8-card {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 10px 12px 12px 12px;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 4px;
+  min-height: 0;
+}
+
+.s8-card-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink);
+  letter-spacing: 0.005em;
+}
+
+.s8-card-caption {
+  font-family: "SF Mono", "Menlo", "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  min-height: 1.2em;
+}
+
+.s8-card-caption .s8-final {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.s8-svg-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.s8-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.s8-svg .point { r: 0.9; }
+
+/* Bottom row: comparison J chart + callout */
+.s8-bottom {
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(0, 1.25fr);
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .s8-bottom { grid-template-columns: 1fr; }
+}
+
+.s8-jchart-wrap {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 8px 10px;
+}
+
+.s8-jchart-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.s8-jchart {
+  display: block;
+  width: 100%;
+  height: 110px;
+}
+
+.s8-jchart .axis path,
+.s8-jchart .axis line { stroke: var(--rule); }
+.s8-jchart .axis text { fill: var(--muted); font-size: 9px; }
+.s8-jchart .grid line { stroke: var(--grid-line); }
+.s8-jchart .j-label {
+  fill: var(--ink-soft);
+  font-size: 9.5px;
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+}
+.s8-jchart .j-line {
+  fill: none;
+  stroke-width: 1.6;
+}
+.s8-jchart .j-line.bad     { stroke: var(--c2); }
+.s8-jchart .j-line.good    { stroke: var(--c5); }
+.s8-jchart .j-dot.bad      { fill: var(--c2); }
+.s8-jchart .j-dot.good     { fill: var(--c5); }
+
+.s8-callout {
+  border-left: 3px solid var(--accent);
+  background: var(--panel);
+  padding: 12px 14px;
+  border-radius: 0 4px 4px 0;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--t-med), transform var(--t-med);
+  pointer-events: none;
+}
+.s8-callout.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.s8-callout-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.s8-callout-body {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.s8-footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+.s8-footer kbd {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 0.82em;
+  padding: 1px 5px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: var(--panel);
+  color: var(--ink-soft);
+}
+
+.s8-step-pill {
+  font-family: "SF Mono", "Menlo", "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--muted);
+  border: 1px solid var(--rule);
+  background: var(--panel);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}

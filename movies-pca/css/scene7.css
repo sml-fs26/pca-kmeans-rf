@@ -1,0 +1,80 @@
+/* Scene 7 — PCA math */
+
+.s7-layout {
+  align-items: center;
+  justify-content: center;
+}
+
+.s7-stack {
+  max-width: 720px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+}
+
+.s7-heading {
+  margin-bottom: 8px;
+}
+
+.s7-lede {
+  font-size: 16px;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+  max-width: none;
+}
+
+.s7-formula {
+  margin: 6px 0 12px;
+  font-size: 18px;
+}
+
+.s7-annotation {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+  max-width: none;
+}
+
+.s7-steplist {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-top: 1px solid var(--rule);
+  padding-top: 12px;
+}
+
+.s7-steplist-item {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 4px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--panel);
+}
+
+.s7-steplist-item::before {
+  content: counter(li-num) ". ";
+  counter-increment: li-num;
+  color: var(--muted);
+}
+
+.s7-steplist { counter-reset: li-num; }
+
+.s7-steplist-item.active {
+  color: var(--ink);
+  border-color: var(--ink);
+  background: var(--bg);
+  font-weight: 600;
+  font-style: normal;
+}
+.s7-steplist-item.done {
+  color: var(--ink-soft);
+  border-color: var(--rule);
+}
