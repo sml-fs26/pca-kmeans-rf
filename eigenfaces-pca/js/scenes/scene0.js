@@ -44,7 +44,7 @@ window.scenes.scene0 = function (root) {
   const N_TILES = 16;
   const tiles = [];
   for (let i = 0; i < N_TILES; i++) {
-    const c = FaceCanvas.create(teaser, { w: 64, h: 64, scale: 2 });
+    const c = FaceCanvas.create(teaser, { w: 64, h: 64, scale: 1.5 });
     tiles.push(c);
   }
 

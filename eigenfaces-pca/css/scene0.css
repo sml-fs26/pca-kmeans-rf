@@ -1,16 +1,20 @@
 /* Scene 0 — hero */
 .scene-hero { justify-content: center; align-items: center; text-align: center; }
-.hero-layout { display: flex; align-items: center; justify-content: center; }
+.hero-layout { display: flex; align-items: center; justify-content: center; flex: 1; min-height: 0; }
 .hero-stack {
   display: flex; flex-direction: column; align-items: center;
-  gap: 16px; max-width: 760px;
+  gap: 12px; max-width: 720px;
 }
 .hero-overtitle {
   font-family: "Iowan Old Style", "Palatino", Georgia, serif;
-  font-style: italic; color: var(--muted); font-size: 16px; margin: 0;
+  font-style: italic; color: var(--muted); font-size: 15px; margin: 0;
 }
-.hero-title { margin: 0; }
-.hero-subtitle { color: var(--ink-soft); font-size: 18px; max-width: 56ch; margin: 0; }
-.hero-teaser { margin-top: 12px; }
+.hero-title {
+  margin: 0;
+  font-size: clamp(34px, 5vw, 60px);
+  line-height: 1.05;
+}
+.hero-subtitle { color: var(--ink-soft); font-size: 17px; max-width: 56ch; margin: 0; }
+.hero-teaser { margin-top: 6px; }
 .hero-grid { gap: 4px !important; }
-.hero-cta { color: var(--muted); font-size: 14px; margin-top: 12px; }
+.hero-cta { color: var(--muted); font-size: 13px; margin-top: 8px; }
