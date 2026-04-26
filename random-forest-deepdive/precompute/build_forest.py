@@ -117,11 +117,19 @@ def serialize_tree(clf: DecisionTreeClassifier, n_classes: int) -> list:
 
     for orig_id in order:
         is_leaf = t.children_left[orig_id] == -1
-        # value shape: (1, n_clf_classes); pad to n_classes
+        # sklearn 1.5+ stores tree_.value as normalized probabilities (sum to 1),
+        # not counts — so multiply by n_node_samples to recover integer-valued
+        # class counts. Pre-1.5 unweighted trees would already be counts; the
+        # multiplication is a no-op in that case modulo float precision.
+        n_samples = int(t.n_node_samples[orig_id])
         raw = t.value[orig_id][0]
+        if raw.sum() <= 1.001:                 # probability mode (sklearn ≥1.5)
+            counts = raw * n_samples
+        else:                                  # already counts (older sklearn)
+            counts = raw
         dist = [0] * n_classes
         for c, i in cls_index.items():
-            dist[c] = int(round(raw[i]))
+            dist[c] = int(round(counts[i]))
         majority = int(np.argmax(dist))
         node = {
             "id": id_remap[orig_id],

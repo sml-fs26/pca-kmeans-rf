@@ -79,6 +79,7 @@ Sticky viz column on one side, prose scrolls on the other. `scrollama.min.js` tr
 - **Best for:** linear hero narratives. Lecturer scrolls through it as a presentation.
 - **Reference:** `congress-story/` in the originating repo.
 - **Limitation:** unidirectional. Can't have "click Next within scene 4 to walk through the assignment-step math." If the math is non-trivial and needs explicit decision points, use click-step.
+- **CSS gotcha — sticky inside CSS Grid.** The shared shell uses `display: grid` for the prose/viz two-column layout. Grid's default `align-items: stretch` makes the viz column fill the full grid row (in a 12-scene viz, that's `12 × 100vh` = 1200vh), which silently kills sticky positioning — the column has nowhere to "stick" when it already covers everything. **Always add `align-self: start` on the viz column** alongside `position: sticky; top: 0; height: 100vh`. Symptom when you forget: viz-stage shows briefly above the hero, then disappears entirely as you scroll into the first scene.
 
 ### Click-step
 
@@ -438,6 +439,60 @@ Then `Read` the PNGs. Combine with `&run` for animation scenes:
 Ignore stderr unless it contains `CONSOLE` or `JavaScript` — almost everything else is GPU/CVDisplayLink platform noise.
 
 (Real example: a 16×12 heatmap in a PCA viz had column labels rotated -55° and clipped past the right edge by ~37px. Pure code review showed nothing. The screenshot showed it immediately, and one CSS edit fixed it.)
+
+#### Scrollytelling viz: hash routing alone won't scroll the viewport
+
+For **scrollytelling** viz (sticky viz column + scroll-driven scenes), the recipe above lands on the hero, not on the requested scene. Headless Chrome runs the page's `scrollIntoView` from hash routing, but `--screenshot=` fires before the viewport scroll commits. All five agents who built `random-forest-deepdive/` independently reinvented the same iframe-wrapper workaround — inline it here so the next one doesn't.
+
+Save this once as `/tmp/grab.html` and screenshot through it instead of the page directly:
+
+```html
+<!doctype html>
+<html><head><meta charset="utf-8"><title>scene grab</title>
+<style>html,body{margin:0;padding:0;height:100%;width:100%;overflow:hidden}iframe{width:100%;height:100%;border:0}</style>
+</head><body><iframe id="f"></iframe>
+<script>
+  const params = new URLSearchParams(location.search);
+  const scene = parseInt(params.get('s') || '1', 10);
+  const theme = params.get('theme') || 'light';
+  const f = document.getElementById('f');
+  f.src = params.get('url');                          // pass the viz URL via ?url=
+  f.onload = () => {
+    const doc = f.contentDocument, win = f.contentWindow;
+    doc.documentElement.setAttribute('data-theme', theme);
+    let tries = 0;
+    function tryScroll() {
+      tries++;
+      const el = doc.querySelector(`.scene[data-scene="${scene}"]`);
+      const viz = doc.querySelector('.viz-column');
+      if (el && viz && viz.getBoundingClientRect().height > 100) {
+        el.scrollIntoView({ block: 'start' });
+        win.dispatchEvent(new Event('scroll'));         // wakes scrollama
+        document.title = `READY scene ${scene}`;
+      } else if (tries < 40) setTimeout(tryScroll, 80);
+    }
+    setTimeout(tryScroll, 150);
+  };
+</script></body></html>
+```
+
+Then loop:
+
+```bash
+URL="file:///abs/path/to/index.html"
+for n in 1 2 3 4 5 6 7 8 9 10 11 12; do
+  for theme in light dark; do
+    "$CHROME" --headless --disable-gpu --virtual-time-budget=10000 \
+      --window-size=1400,900 \
+      --screenshot=/tmp/scene_${n}_${theme}.png \
+      "file:///tmp/grab.html?s=${n}&theme=${theme}&url=${URL}"
+  done
+done
+```
+
+If the screenshots still come back showing only the hero, the iframe-wrapper trick has hit a Chrome version that defers nested-frame layout. In that case the working alternative every time is **DevTools Protocol via `Page.captureScreenshot`** after explicitly waiting for `Page.frameStoppedLoading` and a manual `Runtime.evaluate` to scroll. That's heavier — only reach for it if the iframe wrapper truly fails.
+
+(Real example: building `random-forest-deepdive/` in a single fan-out, all 5 scene agents wasted 2–5 minutes each rediscovering this. The skill saving it once would have saved the whole batch ~15 minutes of duplicated trial-and-error.)
 
 ## Things to never do
 
