@@ -8,10 +8,10 @@ window.scenes.scene5 = function (root) {
   root.appendChild(layout);
 
   const left = document.createElement('div');
-  left.className = 'viz-wrap';
-  left.style.padding = '24px';
+  left.className = 'viz-wrap s5-grid-wrap';
+  left.style.padding = '20px';
   left.style.alignItems = 'center';
-  left.style.justifyContent = 'center';
+  left.style.justifyContent = 'flex-start';
   layout.appendChild(left);
 
   const grid = document.createElement('div');
@@ -48,7 +48,7 @@ window.scenes.scene5 = function (root) {
     const K = Math.min(16, F.meta.K);
     for (let j = 0; j < K; j++) {
       const col = document.createElement('div');
-      const c = FaceCanvas.create(col, { w: F.meta.W, h: F.meta.H, scale: 2 });
+      const c = FaceCanvas.create(col, { w: F.meta.W, h: F.meta.H, scale: 1.5 });
       c.classList.add('interactive');
       const ef = Faces.eigenface(j);
       FaceCanvas.render(c, ef, { signed: true });

@@ -1,2 +1,9 @@
 /* Scene 5 — eigenfaces */
 .s5-readout { font-size: 12px; min-height: 1.4em; }
+
+/* The 4×4 eigenface grid can exceed viewport height on shorter screens.
+   Override .viz-wrap's overflow:hidden so the grid is scrollable when needed. */
+.viz-wrap.s5-grid-wrap {
+  overflow-y: auto;
+  overflow-x: hidden;
+}

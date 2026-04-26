@@ -41,12 +41,14 @@ window.FaceCanvas = (function () {
   function detectMode(vec, opts) {
     if (opts && opts.signed) return 'signed';
     if (vec instanceof Uint8Array) return 'u8';
-    // Float32: check for negatives
-    let hasNeg = false;
+    // Explicit bounds → caller knows the range; clamp into it (unit mode).
+    // Without this, a single out-of-range pixel from PCA reconstruction
+    // would flip the whole face to the diverging blue↔red ramp.
+    if (opts && (opts.min != null || opts.max != null)) return 'unit';
     for (let i = 0; i < vec.length; i++) {
-      if (vec[i] < 0) { hasNeg = true; break; }
+      if (vec[i] < 0) return 'signed';
     }
-    return hasNeg ? 'signed' : 'unit';
+    return 'unit';
   }
 
   function paintU8(imgData, vec) {
