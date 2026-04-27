@@ -3,8 +3,8 @@
  * Three shapes with one redundant: c = 0.5*a + 0.5*b + ε. PCA discovers the
  * true 2D structure. Four click-steps:
  *   1) State the construction: small sample grid + the equation for c.
- *   2) Show the (a,b,c) scatter on the 2D plane (static SVG isometric).
- *   3) Reveal eigenvalues: bar chart with two real bars and one ~zero pip.
+ *   2) Drag-rotate (a,b,c) scatter — points lie on a tilted 2D plane.
+ *   3) Same scatter + eigenvalue bars: two real bars and one ~zero pip.
  *   4) Three eigen-images: v1, v2 (real mixtures) and v3 (noise).
  *
  * For the eigen-images we pass {signed: true} per spec — v2/v3 have negative
@@ -80,107 +80,175 @@ window.scenes.scene6 = function (root) {
     return wrap;
   }
 
-  // 3D-isometric scatter of (a,b,c) — static SVG. Projection per spec.
+  // 3D rotatable scatter of (a,b,c). Drag to rotate around vertical (yaw) and
+  // horizontal (pitch) axes. yaw/pitch live at scene scope so the rotation
+  // persists when the user steps between scenes 2 and 3 (both use this view).
+  //
+  // Geometry: (a, b) are the floor plane, c points up. The cube wireframe is
+  // drawn as orientation cue; the plane c = 0.5(a+b) is the rank-2 manifold
+  // the data lives on; 200 sample points are projected and depth-sorted.
   function buildScatter3D() {
     const wrap = document.createElement('div');
     wrap.className = 's6-scatter-wrap';
 
-    // Use a 100x80 viewBox; we project 3D (a,b,c) into screen coords scaled to
-    // fit a ~80x60 region, anchored near the centre.
-    const VBW = 100, VBH = 80;
-    const svg = d3.select(wrap).append('svg')
+    const W = 540, H = 420;
+    const svgSel = d3.select(wrap).append('svg')
       .attr('class', 's6-scatter-svg')
-      .attr('viewBox', `0 0 ${VBW} ${VBH}`)
+      .attr('viewBox', `0 0 ${W} ${H}`)
       .attr('preserveAspectRatio', 'xMidYMid meet');
+    const svgEl = svgSel.node();
 
-    // Projection. The spec's projection (a-axis at 30°, b-axis at 150°,
-    // c-axis straight up) collapses the plane c = 0.5(a+b) edge-on: any
-    // projection where (a+b) and c project to screen-y with weights in a
-    // 1:2 ratio degenerates the rank-2 plane into a horizontal line. So we
-    // tilt the c-axis off the screen-vertical (pitch the camera down a bit)
-    // and pick yaw angles for a, b that are not symmetric about screen-y.
-    //
-    // Per-axis screen direction. The spec's projection (a-axis at 30°,
-    // b-axis at 150°, c-axis straight up) collapses the plane c = 0.5(a+b)
-    // edge-on to a horizontal line because (a+b) and c both contribute to
-    // screen-y in a 1:2 ratio, exactly matching the plane equation. To break
-    // this degeneracy we use a slanted c-axis (up-and-noticeably-to-the-left)
-    // so the c=0.5(a+b) plane projects to a proper parallelogram.
-    //
-    //   a-axis: (cos(-25°), sin(-25°))                  — down-right, length 1
-    //   b-axis: (cos(-155°), sin(-155°))                — down-left, length 1
-    //   c-axis: (-0.55, 0.83)                           — up-and-left, length ≈ 1
-    const L = 26;
-    const cx = 50, cy = 52;
-    const A_THETA = (-25 * Math.PI) / 180;
-    const B_THETA = (-155 * Math.PI) / 180;
-    const aDir = [Math.cos(A_THETA), Math.sin(A_THETA)];
-    const bDir = [Math.cos(B_THETA), Math.sin(B_THETA)];
-    // Empirically: cDir = (cos(150°), sin(150°)) = (-0.866, 0.5). That gives
-    // c-axis a 0.5 vertical weight, which is well below 2·sin(25°) ≈ 0.846,
-    // so the plane c = 0.5(a+b) projects with sy-weight = -0.173·(a+b) — a
-    // ~9 viewBox-unit vertical spread for (a+b) ∈ [0,2]. Visible parallelogram.
-    const cDir = [-0.866, 0.5];
+    const CX = W / 2, CY = H / 2 + 30; // bias y so the cube sits a bit lower
+    const SCALE = 170;
+    const O = 0.5; // cube is [0,1]^3, recenter to origin
 
-    function proj(a, b, c) {
-      // sy grows DOWN in SVG; the axis directions encode "up the page" as
-      // positive y, so we subtract the y-components.
-      const sx = cx + L * (a * aDir[0] + b * bDir[0] + c * cDir[0]);
-      const sy = cy - L * (a * aDir[1] + b * bDir[1] + c * cDir[1]);
-      return [sx, sy];
+    // Project (a,b,c) → {x, y, depth}. Yaw rotates around world c (vertical);
+    // pitch rotates around the screen-x axis after yaw. Screen y grows down,
+    // so we subtract the c-component when mapping to screen y.
+    function project(p) {
+      const a = p[0] - O, b = p[1] - O, c = p[2] - O;
+      const cyaw = Math.cos(viewYaw), syaw = Math.sin(viewYaw);
+      const a1 =  a * cyaw + b * syaw;
+      const b1 = -a * syaw + b * cyaw;
+      const c1 = c;
+      const cpit = Math.cos(viewPitch), spit = Math.sin(viewPitch);
+      const a2 = a1;
+      const b2 = b1 * cpit - c1 * spit;   // depth (into the screen)
+      const c2 = b1 * spit + c1 * cpit;   // vertical
+      return { x: CX + a2 * SCALE, y: CY - c2 * SCALE, depth: b2 };
     }
 
-    // Plane: c = 0.5*(a + b). Corners (0,0,0), (1,0,0.5), (1,1,1), (0,1,0.5).
-    const planeCorners = [
-      proj(0, 0, 0),
-      proj(1, 0, 0.5),
-      proj(1, 1, 1),
-      proj(0, 1, 0.5),
+    // Static geometry definitions.
+    const cubeCorners = [
+      [0,0,0],[1,0,0],[1,1,0],[0,1,0],
+      [0,0,1],[1,0,1],[1,1,1],[0,1,1],
     ];
-    const planePath = `M ${planeCorners[0][0]} ${planeCorners[0][1]} ` +
-      planeCorners.slice(1).map(p => `L ${p[0]} ${p[1]}`).join(' ') + ' Z';
-    svg.append('path')
-      .attr('class', 's6-plane')
-      .attr('d', planePath);
-
-    // Points (200 of them).
-    const gPoints = svg.append('g').attr('class', 's6-points');
-    const coeffs = variant.coeffs;
-    coeffs.forEach(row => {
-      const a = row[0], b = row[1], c = row[2];
-      const [x, y] = proj(a, b, c);
-      gPoints.append('circle')
-        .attr('class', 's6-point')
-        .attr('cx', x)
-        .attr('cy', y)
-        .attr('r', 0.55);
-    });
-
-    // Axes — drawn last so they sit on top.
-    const gAxes = svg.append('g').attr('class', 's6-axes');
+    const cubeEdgeIdx = [
+      [0,1],[1,2],[2,3],[3,0],
+      [4,5],[5,6],[6,7],[7,4],
+      [0,4],[1,5],[2,6],[3,7],
+    ];
+    const planeCorners = [[0,0,0],[1,0,0.5],[1,1,1],[0,1,0.5]];
     const axisDefs = [
-      { name: 'a (circle)',   tip: proj(1, 0, 0) },
-      { name: 'b (square)',   tip: proj(0, 1, 0) },
-      { name: 'c (triangle)', tip: proj(0, 0, 1) },
+      { name: 'a (circle)',   tip: [1, 0, 0] },
+      { name: 'b (square)',   tip: [0, 1, 0] },
+      { name: 'c (triangle)', tip: [0, 0, 1] },
     ];
-    const origin = proj(0, 0, 0);
-    axisDefs.forEach(ax => {
-      gAxes.append('line')
-        .attr('class', 's6-axis-line')
-        .attr('x1', origin[0]).attr('y1', origin[1])
-        .attr('x2', ax.tip[0]).attr('y2', ax.tip[1]);
-      // label, just past the tip
-      const dx = ax.tip[0] - origin[0];
-      const dy = ax.tip[1] - origin[1];
-      const len = Math.hypot(dx, dy) || 1;
-      const lx = ax.tip[0] + (dx / len) * 2.5;
-      const ly = ax.tip[1] + (dy / len) * 2.5;
-      gAxes.append('text')
-        .attr('class', 's6-axis-label')
-        .attr('x', lx).attr('y', ly)
-        .attr('text-anchor', 'middle')
-        .text(ax.name);
+    const coeffs = variant.coeffs;
+
+    // Layer groups, in painter's order: cube wireframe → plane → points → axes.
+    const gCube   = svgSel.append('g').attr('class', 's6-cube-edges');
+    const planeEl = svgSel.append('path').attr('class', 's6-plane');
+    const gPoints = svgSel.append('g').attr('class', 's6-points');
+    const gAxes   = svgSel.append('g').attr('class', 's6-axes');
+
+    function render() {
+      // Cube edges
+      const edgeData = cubeEdgeIdx.map(([i, j]) => ({
+        p1: project(cubeCorners[i]),
+        p2: project(cubeCorners[j]),
+      }));
+      const eSel = gCube.selectAll('line').data(edgeData);
+      eSel.enter().append('line').attr('class', 's6-cube-edge').merge(eSel)
+        .attr('x1', d => d.p1.x).attr('y1', d => d.p1.y)
+        .attr('x2', d => d.p2.x).attr('y2', d => d.p2.y);
+      eSel.exit().remove();
+
+      // Plane (c = 0.5(a+b))
+      const planeProj = planeCorners.map(project);
+      planeEl.attr('d',
+        `M ${planeProj[0].x} ${planeProj[0].y} ` +
+        planeProj.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ') + ' Z'
+      );
+
+      // Points — sort back→front so closer dots draw on top.
+      const pts = coeffs.map(p => {
+        const pr = project(p);
+        return { x: pr.x, y: pr.y, d: pr.depth };
+      });
+      pts.sort((u, v) => u.d - v.d);
+      const pSel = gPoints.selectAll('circle').data(pts);
+      pSel.enter().append('circle').attr('class', 's6-point').attr('r', 3.6)
+        .merge(pSel)
+        .attr('cx', d => d.x).attr('cy', d => d.y);
+      pSel.exit().remove();
+
+      // Axes (drawn last)
+      const origin = project([0, 0, 0]);
+      const aData = axisDefs.map(ax => {
+        const tip = project(ax.tip);
+        const dx = tip.x - origin.x, dy = tip.y - origin.y;
+        const L = Math.hypot(dx, dy) || 1;
+        return {
+          name: ax.name,
+          tipX: tip.x, tipY: tip.y,
+          labelX: tip.x + (dx / L) * 18,
+          labelY: tip.y + (dy / L) * 18,
+        };
+      });
+      const aSel = gAxes.selectAll('g.s6-axis').data(aData);
+      const aEnter = aSel.enter().append('g').attr('class', 's6-axis');
+      aEnter.append('line').attr('class', 's6-axis-line');
+      aEnter.append('text').attr('class', 's6-axis-label')
+        .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle');
+      const aMerge = aEnter.merge(aSel);
+      aMerge.select('line')
+        .attr('x1', origin.x).attr('y1', origin.y)
+        .attr('x2', d => d.tipX).attr('y2', d => d.tipY);
+      aMerge.select('text')
+        .attr('x', d => d.labelX).attr('y', d => d.labelY)
+        .text(d => d.name);
+      aSel.exit().remove();
+    }
+
+    render();
+
+    // ---- Drag-to-rotate interaction ---------------------------------------
+    let dragging = false, yaw0 = 0, pitch0 = 0, x0 = 0, y0 = 0;
+    function onPointerDown(e) {
+      dragging = true;
+      yaw0 = viewYaw; pitch0 = viewPitch;
+      x0 = e.clientX; y0 = e.clientY;
+      if (e.pointerId != null) {
+        try { svgEl.setPointerCapture(e.pointerId); } catch (_) {}
+      }
+      svgEl.classList.add('is-dragging');
+      e.preventDefault();
+    }
+    function onPointerMove(e) {
+      if (!dragging) return;
+      const dx = e.clientX - x0;
+      const dy = e.clientY - y0;
+      viewYaw = yaw0 + dx * 0.01;
+      viewPitch = pitch0 + dy * 0.01;
+      const lim = Math.PI / 2 - 0.05;
+      if (viewPitch >  lim) viewPitch =  lim;
+      if (viewPitch < -lim) viewPitch = -lim;
+      render();
+    }
+    function onPointerUp(e) {
+      dragging = false;
+      svgEl.classList.remove('is-dragging');
+      if (e.pointerId != null) {
+        try { svgEl.releasePointerCapture(e.pointerId); } catch (_) {}
+      }
+    }
+    svgEl.addEventListener('pointerdown', onPointerDown);
+    svgEl.addEventListener('pointermove', onPointerMove);
+    svgEl.addEventListener('pointerup', onPointerUp);
+    svgEl.addEventListener('pointercancel', onPointerUp);
+
+    cleanups.push(() => {
+      svgEl.removeEventListener('pointerdown', onPointerDown);
+      svgEl.removeEventListener('pointermove', onPointerMove);
+      svgEl.removeEventListener('pointerup', onPointerUp);
+      svgEl.removeEventListener('pointercancel', onPointerUp);
     });
+
+    const tip = document.createElement('p');
+    tip.className = 's6-scatter-tip muted';
+    tip.innerHTML = '<em>drag to rotate · the plane stays flat no matter the angle</em>';
+    wrap.appendChild(tip);
 
     return wrap;
   }
@@ -321,9 +389,22 @@ window.scenes.scene6 = function (root) {
   const STEPS = 4;
   let cursor = 0;
 
+  // Camera state for the 3D scatter — persists across step rebuilds so the
+  // user's chosen rotation carries between steps 2 and 3.
+  let viewYaw = -Math.PI / 5;
+  let viewPitch = Math.PI / 7;
+
+  // Per-step teardown handlers (e.g., pointer listeners on the rotatable SVG).
+  let cleanups = [];
+  function clearCleanups() {
+    cleanups.forEach(fn => { try { fn(); } catch (_) {} });
+    cleanups = [];
+  }
+
   function setStep(c) {
     if (c < 1 || c > STEPS) return false;
     cursor = c;
+    clearCleanups();
     leftCol.innerHTML = '';
     rightSlot.innerHTML = '';
     stepPill.textContent = `Step ${cursor} of ${STEPS}`;
@@ -407,7 +488,9 @@ window.scenes.scene6 = function (root) {
     onEnter() {
       setStep(1);
     },
-    onLeave() {},
+    onLeave() {
+      clearCleanups();
+    },
     onNextKey() {
       if (cursor < STEPS) {
         setStep(cursor + 1);

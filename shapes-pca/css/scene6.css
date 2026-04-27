@@ -47,39 +47,56 @@
   justify-content: center;
 }
 
-/* ---- 3D scatter (steps 2 & 3) ---- */
+/* ---- 3D rotatable scatter (steps 2 & 3) ---- */
 .scene-s6 .s6-scatter-wrap {
   width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6px;
 }
 .scene-s6 .s6-scatter-svg {
   width: 100%;
   max-width: 540px;
   height: 420px;
+  cursor: grab;
+  touch-action: none;       /* prevent panning while dragging */
+  user-select: none;
+}
+.scene-s6 .s6-scatter-svg.is-dragging { cursor: grabbing; }
+.scene-s6 .s6-cube-edge {
+  stroke: var(--rule);
+  stroke-width: 1;
+  stroke-linecap: round;
 }
 .scene-s6 .s6-plane {
   fill: var(--c3);
-  fill-opacity: 0.18;
+  fill-opacity: 0.22;
   stroke: var(--c3);
-  stroke-width: 0.3;
+  stroke-width: 1.2;
 }
 .scene-s6 .s6-point {
   fill: var(--ink);
-  fill-opacity: 0.6;
+  fill-opacity: 0.7;
   stroke: none;
 }
 .scene-s6 .s6-axis-line {
   stroke: var(--ink-soft);
-  stroke-width: 0.35;
+  stroke-width: 1.4;
   stroke-linecap: round;
 }
 .scene-s6 .s6-axis-label {
   font-family: "Iowan Old Style", "Palatino", Georgia, serif;
   font-style: italic;
-  font-size: 4px;
+  font-size: 13px;
   fill: var(--ink-soft);
+}
+.scene-s6 .s6-scatter-tip {
+  font-size: 12px;
+  font-style: italic;
+  margin: 0;
+  text-align: center;
 }
 
 /* ---- Eigenvalue bar chart (step 3) ---- */
@@ -234,5 +251,3 @@
   font-style: italic;
 }
 
-/* Bump axis-label legibility now that they include shape names */
-.scene-s6 .s6-axis-label { font-size: 3.6px; }

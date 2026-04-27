@@ -58,6 +58,12 @@ window.scenes.scene2 = function (root) {
   stageCaption.className = 's2-stage-caption';
   leftCol.appendChild(stageCaption);
 
+  // Inline formula host — only inserted into the caption during step 1
+  // (full-width mode), where the right column is hidden so the strip can
+  // span the entire layout width.
+  const inlineFormula = document.createElement('span');
+  inlineFormula.className = 's2-inline-formula mono';
+
   // Right column: formula + dims + callout.
   const rightCol = document.createElement('div');
   rightCol.className = 's2-right text-col';
@@ -184,6 +190,32 @@ window.scenes.scene2 = function (root) {
     animStage.classList.add('is-' + state);
   }
 
+  // Full-width mode (step 1). Recomputes --stage-w / --strip-row-w / --scale-x
+  // / --img-x from the actual measured stage width so the strip spans the
+  // full layout width and each row tile sits exactly on a 1/32 column.
+  const IMG_W = 256;
+  function applyWideStageVars() {
+    if (!layout.classList.contains('s2-layout--full')) return;
+    const w = animStage.clientWidth;
+    if (w <= 0) return;
+    const stripRowW = w / 32;
+    animStage.style.setProperty('--stage-w', `${w}px`);
+    animStage.style.setProperty('--strip-row-w', `${stripRowW}px`);
+    animStage.style.setProperty('--scale-x', String(stripRowW / IMG_W));
+    animStage.style.setProperty('--img-x', `${(w - IMG_W) / 2}px`);
+  }
+  function clearWideStageVars() {
+    animStage.style.removeProperty('--stage-w');
+    animStage.style.removeProperty('--strip-row-w');
+    animStage.style.removeProperty('--scale-x');
+    animStage.style.removeProperty('--img-x');
+  }
+  let resizeObs = null;
+  if (typeof ResizeObserver !== 'undefined') {
+    resizeObs = new ResizeObserver(() => applyWideStageVars());
+    resizeObs.observe(animStage);
+  }
+
   // ---- State + render -------------------------------------------------------
   let cursor = 0;
   let animTimeouts = [];
@@ -196,6 +228,18 @@ window.scenes.scene2 = function (root) {
     clearAnimTimeouts();
     stepPill.textContent = `${STEP_LABELS[cursor]}  ·  Step ${cursor + 1} of ${STEPS}`;
 
+    // Full-width mode for step 1 only — single column, hide right col, strip
+    // spans full width. Reading clientWidth in applyWideStageVars triggers a
+    // synchronous reflow, so the wide variables are in place before the
+    // animation starts and the rows land on the right x-positions.
+    if (cursor === 1) {
+      layout.classList.add('s2-layout--full');
+      applyWideStageVars();
+    } else {
+      layout.classList.remove('s2-layout--full');
+      clearWideStageVars();
+    }
+
     // Lede + caption per step.
     if (cursor === 0) {
       lede.innerHTML = "Pick one image. Look at it. It's a picture.";
@@ -203,6 +247,9 @@ window.scenes.scene2 = function (root) {
     } else if (cursor === 1) {
       lede.innerHTML = 'Slice it into rows. Lay them end-to-end. The image becomes one 1024-pixel vector.';
       stageCaption.innerHTML = '<em>row 0, then row 1, then row 2 … row 31. Same pixels, different shape.</em>';
+      // Render the formula inline so the strip can use the full width.
+      renderKatex(inlineFormula, 'x_0 \\in \\mathbb{R}^{1024}', false);
+      stageCaption.appendChild(inlineFormula);
     } else if (cursor === 2) {
       lede.innerHTML = "One row per image. That's the data matrix <span class=\"mono\">X</span>.";
       stageCaption.innerHTML = '<em>each image is now a row in <span class="mono">X</span>.</em>';

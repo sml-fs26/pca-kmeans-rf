@@ -38,10 +38,10 @@
   --img-y: 16px;
   --row-h: 8px;          /* 256 / 32 */
   --strip-y: 290px;
-  --strip-row-w: 15px;   /* 480 / 32 */
+  --strip-row-w: 15px;   /* default; recomputed by JS in full-width mode */
   --strip-row-h: 4px;
   --strip-x0: 0px;       /* row-0 x at strip state */
-  --scale-x: 0.05859375; /* strip-row-w / img-w = 15/256 */
+  --scale-x: 0.05859375; /* default; recomputed by JS in full-width mode */
   --scale-y: 0.5;        /* strip-row-h / row-h = 4/8 */
 
   position: relative;
@@ -93,15 +93,20 @@
 
 /* 'Strip' — rows translated and scaled so they form a single thin row at
  * the bottom of the stage. The maths:
+ *   each row is positioned at CSS top = img-y, and we replace its transform.
  *   target left = row-idx * strip-row-w  (so x-offset = row-idx * w − img-x)
- *   target top  = strip-y                (so y-offset = strip-y − row-idx * row-h − img-y)
- *   scale = (scale-x, scale-y)
+ *   target top  = strip-y                (so y-offset = strip-y − img-y)
+ *   scale = (scale-x, scale-y) applied around top-left
+ *
+ * Note: do NOT subtract `row-idx * row-h` from the y component — that term
+ * was an over-correction that placed the rows on a diagonal sweep instead
+ * of a single horizontal strip.
  */
 .scene-s2 .s2-anim-stage.is-strip > .s2-row {
   transform:
     translate(
       calc(var(--row-idx) * var(--strip-row-w) - var(--img-x)),
-      calc(var(--strip-y) - var(--img-y) - var(--row-idx) * var(--row-h))
+      calc(var(--strip-y) - var(--img-y))
     )
     scale(var(--scale-x), var(--scale-y));
 }
@@ -219,6 +224,27 @@
   color: var(--ink);
   background: linear-gradient(transparent 60%, var(--panel-hover) 60%);
   padding: 0 3px;
+}
+
+/* Full-width mode (used by step 1, "Unroll"). Single column, hide the right
+ * column entirely so the strip can use the full layout width. The formula
+ * "x_0 ∈ R^1024" is shown inline in the stage caption instead. */
+.scene-s2 .scene-layout.s2-layout--full {
+  grid-template-columns: 1fr;
+}
+.scene-s2 .scene-layout.s2-layout--full > .s2-right {
+  display: none;
+}
+.scene-s2 .scene-layout.s2-layout--full .s2-anim-stage {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.scene-s2 .s2-inline-formula {
+  margin-left: 14px;
+  color: var(--ink-soft);
+  font-style: normal;
 }
 
 @media (max-width: 720px) {

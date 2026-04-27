@@ -85,8 +85,10 @@ window.scenes.scene4 = function (root) {
   eqStrip.appendChild(makeOp('='));
   eqStrip.appendChild(cellRec.root);
 
-  // Mean canvas is static — render once.
-  ImageCanvas.render(cellMean.canvas, mean);
+  // Mean canvas is static — render once. Use the same fixed [0,1] range as the
+  // reconstruction so that x̂ = μ when α₁ = α₂ = 0 (μ has values around 0.5,
+  // so it should render as mid-gray, exactly matching the reconstruction).
+  ImageCanvas.render(cellMean.canvas, mean, { min: 0, max: 1 });
 
   const stripCaption = document.createElement('p');
   stripCaption.className = 's4-strip-caption';
@@ -242,7 +244,7 @@ window.scenes.scene4 = function (root) {
   });
 
   // ---- Theme reactivity (re-render bitmaps) --------------------------------
-  function onThemeChange() { rerender(); ImageCanvas.render(cellMean.canvas, mean); }
+  function onThemeChange() { rerender(); ImageCanvas.render(cellMean.canvas, mean, { min: 0, max: 1 }); }
   window.addEventListener('theme-change', onThemeChange);
 
   // Initial render
