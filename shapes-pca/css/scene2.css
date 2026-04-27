@@ -1,0 +1,135 @@
+/* Scene 2 — A picture is just a vector. */
+
+.scene-s2 .s2-step-pill {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 4px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--panel);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.scene-s2 .s2-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.scene-s2 .s2-heading { margin-bottom: 0; }
+.scene-s2 .s2-lede { margin-bottom: 4px; }
+
+.scene-s2 .s2-image-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.scene-s2 .s2-image-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.scene-s2 .s2-strip-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.scene-s2 .s2-strip-row {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.scene-s2 .s2-strip-tag {
+  text-align: right;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.scene-s2 canvas.s2-strip {
+  display: block;
+  width: 100%;
+  height: 12px;
+  border: 1px solid var(--image-frame);
+  border-radius: 2px;
+  background: var(--image-bg);
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.scene-s2 .s2-strip-ellipsis {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: italic;
+}
+.scene-s2 .s2-strip-dots {
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.scene-s2 .s2-strip-caption {
+  text-align: center;
+  color: var(--muted);
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-size: 13px;
+}
+
+/* Right column. */
+.scene-s2 .s2-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  justify-content: center;
+}
+
+.scene-s2 .s2-formula { margin: 0; }
+
+.scene-s2 .s2-dims-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.scene-s2 .s2-dim-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 10px 12px;
+}
+
+.scene-s2 .s2-dim-label {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+}
+
+.scene-s2 .s2-dim-value {
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.scene-s2 .s2-dim-highlight {
+  color: var(--ink);
+  background: linear-gradient(transparent 60%, var(--panel-hover) 60%);
+  padding: 0 3px;
+}

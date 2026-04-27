@@ -1,0 +1,140 @@
+/* Scene 6 — One shape is a fiction (rank deficiency). */
+
+.scene-s6 .s6-layout {
+  position: relative;
+}
+
+.scene-s6 .s6-step-pill {
+  margin-bottom: 6px;
+}
+
+.scene-s6 .s6-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.scene-s6 .s6-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 56ch;
+  min-height: 0;
+}
+
+.scene-s6 .s6-heading {
+  margin-bottom: 6px;
+}
+
+.scene-s6 .s6-subhead {
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.scene-s6 .s6-right-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ---- Sample grid (step 1) ---- */
+.scene-s6 .s6-sample-grid {
+  display: grid;
+  grid-template-columns: repeat(4, max-content);
+  gap: 12px;
+  justify-content: center;
+}
+
+/* ---- 3D scatter (steps 2 & 3) ---- */
+.scene-s6 .s6-scatter-wrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.scene-s6 .s6-scatter-svg {
+  width: 100%;
+  max-width: 540px;
+  height: 420px;
+}
+.scene-s6 .s6-plane {
+  fill: var(--c3);
+  fill-opacity: 0.18;
+  stroke: var(--c3);
+  stroke-width: 0.3;
+}
+.scene-s6 .s6-point {
+  fill: var(--ink);
+  fill-opacity: 0.6;
+  stroke: none;
+}
+.scene-s6 .s6-axis-line {
+  stroke: var(--ink-soft);
+  stroke-width: 0.35;
+  stroke-linecap: round;
+}
+.scene-s6 .s6-axis-label {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 4px;
+  fill: var(--ink-soft);
+}
+
+/* ---- Eigenvalue bar chart (step 3) ---- */
+.scene-s6 .s6-eval-chart-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 4px;
+}
+.scene-s6 .s6-bar-svg {
+  width: 100%;
+  max-width: 380px;
+  height: 220px;
+}
+.scene-s6 .s6-bar { fill: var(--c1); }
+.scene-s6 .s6-bar-value {
+  font-size: 3.4px;
+  fill: var(--ink-soft);
+  font-family: "SF Mono", "Menlo", "JetBrains Mono", monospace;
+}
+.scene-s6 .s6-x-label {
+  font-size: 3.6px;
+  fill: var(--muted);
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+}
+.scene-s6 .s6-baseline {
+  stroke: var(--rule);
+  stroke-width: 0.3;
+}
+.scene-s6 .grid line {
+  stroke: var(--grid-line);
+  stroke-width: 0.2;
+}
+.scene-s6 .s6-chart-caption {
+  font-size: 13px;
+  text-align: center;
+  margin: 0;
+}
+
+/* ---- Eigen-image row (step 4) ---- */
+.scene-s6 .s6-eigen-row {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.scene-s6 .s6-eigen-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.scene-s6 .s6-formula {
+  margin: 4px 0;
+}

@@ -1,0 +1,199 @@
+/* Scene 7 — When colors correlate, eigenvectors rotate. */
+
+.scene-s7 .s7-layout {
+  align-items: stretch;
+  min-height: 0;
+}
+
+/* Left column ------------------------------------------------------------- */
+.scene-s7 .s7-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.scene-s7 .s7-card-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.scene-s7 .s7-scatter-card,
+.scene-s7 .s7-eig-card {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 10px 14px;
+}
+
+/* Scatter ----------------------------------------------------------------- */
+.scene-s7 .s7-scatter-host {
+  display: flex;
+  justify-content: center;
+}
+.scene-s7 .s7-scatter-svg {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+}
+.scene-s7 .s7-pt {
+  opacity: 0.78;
+  stroke: none;
+}
+.scene-s7 .s7-tick {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  fill: var(--muted);
+}
+.scene-s7 .s7-axis-label {
+  font-style: italic;
+  font-size: 11px;
+  fill: var(--muted);
+}
+.scene-s7 .s7-axis-x line,
+.scene-s7 .s7-axis-y line {
+  stroke: var(--rule);
+}
+.scene-s7 .grid line {
+  stroke: var(--grid-line);
+}
+.scene-s7 .s7-arrow {
+  stroke-linecap: round;
+}
+.scene-s7 .s7-arrow-label {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 12px;
+  font-weight: 500;
+}
+.scene-s7 .s7-rho-corner {
+  font-size: 12px;
+  fill: var(--ink-soft);
+}
+
+/* Eigen-image grid -------------------------------------------------------- */
+.scene-s7 .s7-eig-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  justify-items: center;
+}
+.scene-s7 .s7-eig-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.scene-s7 .s7-eig-label {
+  font-size: 16px;
+  color: var(--ink);
+}
+.scene-s7 .s7-eig-canvas-host canvas.shape-image {
+  transition: filter var(--t-fast);
+}
+.scene-s7 .s7-eig-readout {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 12px;
+}
+.scene-s7 .s7-readout-lambda {
+  font-weight: 600;
+  color: var(--ink);
+}
+.scene-s7 .s7-readout-pct {
+  font-size: 11px;
+}
+
+/* Right column ------------------------------------------------------------ */
+.scene-s7 .s7-right {
+  justify-content: flex-start;
+  padding-top: 4px;
+  overflow-y: auto;
+}
+.scene-s7 .s7-heading {
+  margin-bottom: 8px;
+}
+.scene-s7 .s7-lede {
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+/* ρ control --------------------------------------------------------------- */
+.scene-s7 .s7-rho-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.scene-s7 .s7-rho-ctrl-label {
+  font-size: 13px;
+  font-style: italic;
+}
+.scene-s7 .s7-rho-btns {
+  display: flex;
+  gap: 6px;
+}
+.scene-s7 .s7-rho-btn {
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--rule);
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  min-width: 44px;
+}
+.scene-s7 .s7-rho-btn:hover {
+  border-color: var(--ink);
+  background: var(--panel-hover);
+}
+.scene-s7 .s7-rho-btn.is-active {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+.scene-s7 .s7-rho-readout {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-left: 4px;
+}
+
+/* Prose ------------------------------------------------------------------- */
+.scene-s7 .s7-prose {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.scene-s7 .s7-prose em {
+  color: var(--ink);
+}
+
+/* Formula block tightened */
+.scene-s7 .s7-formula {
+  margin: 8px 0 12px;
+  padding: 14px 16px;
+}
+.scene-s7 .s7-formula .katex-display {
+  font-size: 0.92em;
+}
+
+/* Callout */
+.scene-s7 .s7-callout {
+  font-size: 13px;
+  line-height: 1.55;
+  margin-top: 8px;
+}
+.scene-s7 .s7-callout em {
+  color: var(--ink);
+}

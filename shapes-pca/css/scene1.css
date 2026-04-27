@@ -1,0 +1,100 @@
+/* Scene 1 — Two numbers per image. */
+
+.scene-s1 .s1-left {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.scene-s1 .s1-image-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+
+.scene-s1 .s1-formula {
+  margin: 0;
+}
+
+.scene-s1 .s1-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 14px 16px;
+}
+
+.scene-s1 .s1-slider-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 50px;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.scene-s1 .s1-slider-label {
+  color: var(--ink-soft);
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+}
+
+.scene-s1 .s1-slider {
+  width: 100%;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+
+.scene-s1 .s1-slider-value {
+  color: var(--muted);
+  text-align: right;
+}
+
+.scene-s1 .s1-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.scene-s1 .s1-viz-wrap {
+  flex: 1;
+  min-height: 320px;
+}
+
+.scene-s1 .s1-caption {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+  margin: 0;
+}
+
+/* SVG bits — no inline fills, only classes. */
+.scene-s1 svg .s1-grid line { stroke: var(--grid-line); stroke-width: 0.18; }
+.scene-s1 svg .s1-axis line { stroke: var(--rule); stroke-width: 0.32; }
+.scene-s1 svg .s1-tick-label { fill: var(--muted); font-size: 3.2px; }
+.scene-s1 svg .s1-axis-title {
+  fill: var(--muted);
+  font-size: 3.6px;
+  font-style: italic;
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+}
+
+.scene-s1 svg .s1-sample {
+  fill: var(--muted);
+  stroke: var(--bg);
+  stroke-width: 0.18;
+  opacity: 0.75;
+}
+.scene-s1 svg .s1-current {
+  fill: var(--ink);
+  stroke: var(--bg);
+  stroke-width: 0.4;
+}

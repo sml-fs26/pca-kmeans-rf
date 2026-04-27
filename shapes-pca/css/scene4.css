@@ -1,0 +1,146 @@
+/* Scene 4 — Reconstruction is addition. */
+
+.scene-s4 .s4-layout {
+  align-items: stretch;
+  gap: 28px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.scene-s4 .s4-left,
+.scene-s4 .s4-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.scene-s4 .s4-title-block {
+  margin-bottom: 14px;
+}
+.scene-s4 .s4-title-block .step-pill {
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+/* Equation strip ----------------------------------------------------------- */
+.scene-s4 .s4-eq-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+
+.scene-s4 .s4-eq-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.scene-s4 .s4-eq-canvas-host {
+  display: flex;
+  justify-content: center;
+}
+
+.scene-s4 .s4-eq-cap {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.scene-s4 .s4-eq-op {
+  font-size: 28px;
+  color: var(--muted);
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  padding: 0 4px;
+  align-self: center;
+  /* lift slightly so it sits in the middle of the canvas, not the caption row */
+  transform: translateY(-12px);
+}
+
+.scene-s4 .s4-strip-caption {
+  margin-top: 16px;
+  color: var(--ink-soft);
+  max-width: 60ch;
+}
+
+/* Right column: controls --------------------------------------------------- */
+.scene-s4 .s4-right {
+  gap: 14px;
+  align-self: center;
+  max-width: 440px;
+  width: 100%;
+}
+
+.scene-s4 .s4-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 18px 20px;
+}
+
+/* slider-row layout (we don't define this in style.css for shapes-pca, so do it here) */
+.scene-s4 .slider-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 70px;
+  align-items: center;
+  gap: 12px;
+}
+
+.scene-s4 .s4-slider-label {
+  font-size: 16px;
+  color: var(--ink);
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+}
+.scene-s4 .s4-greek {
+  font-style: italic;
+}
+
+.scene-s4 .slider-row input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.scene-s4 .slider-val {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 14px;
+  text-align: right;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.scene-s4 .s4-formula {
+  margin: 4px 0;
+  text-align: center;
+}
+
+.scene-s4 .s4-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+.scene-s4 .s4-btn-hint {
+  font-size: 12px;
+  font-style: italic;
+}
+
+@media (max-width: 1100px) {
+  .scene-s4 .s4-eq-strip {
+    justify-content: center;
+  }
+  .scene-s4 .s4-right {
+    align-self: stretch;
+    max-width: none;
+  }
+}

@@ -1,0 +1,198 @@
+/* Scene 3 — PCA returns the shapes. */
+
+.scene-s3 .s3-layout {
+  grid-template-rows: auto auto auto auto auto;
+  gap: 10px;
+  align-content: start;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.scene-s3 .s3-header {
+  text-align: center;
+}
+.scene-s3 .s3-header .step-pill {
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.scene-s3 .s3-header h2 {
+  margin-bottom: 4px;
+  font-size: clamp(22px, 2.4vw, 30px);
+}
+.scene-s3 .s3-header p {
+  margin: 0 auto;
+  max-width: 64ch;
+  font-size: 14px;
+}
+
+/* Sample strip ------------------------------------------------------------- */
+.scene-s3 .s3-strip-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.scene-s3 .s3-strip-label {
+  font-size: 12px;
+  font-style: italic;
+}
+.scene-s3 .s3-strip {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* In step 3, hide the sample strip + formula and shrink the captions/cards
+   to leave room for the bar chart. */
+.scene-s3 .s3-layout.is-step3 .s3-strip-wrap,
+.scene-s3 .s3-layout.is-step3 .s3-formula {
+  display: none;
+}
+.scene-s3 .s3-layout.is-step3 .s3-card .s3-card-canvas-host canvas.shape-image {
+  width: 110px !important;
+  height: 110px !important;
+}
+.scene-s3 .s3-layout.is-step3 .image-caption {
+  display: none;
+}
+.scene-s3 .s3-layout.is-step3 .s3-reveal {
+  gap: 32px;
+}
+.scene-s3 .s3-strip-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Formula -------------------------------------------------------------------*/
+.scene-s3 .s3-formula {
+  margin: 0 auto;
+  max-width: 320px;
+  padding: 10px 16px;
+}
+
+/* Reveal row (the two eigen-image cards) ----------------------------------- */
+.scene-s3 .s3-reveal {
+  display: flex;
+  gap: 28px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.scene-s3 .s3-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--t-med), transform var(--t-med);
+  pointer-events: none;
+}
+.scene-s3 .s3-card.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.scene-s3 .s3-card-label {
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.scene-s3 .s3-card-canvas-host {
+  display: flex;
+  justify-content: center;
+}
+
+.scene-s3 .s3-card-readout {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  font-size: 14px;
+}
+.scene-s3 .s3-readout-lambda {
+  font-weight: 600;
+  color: var(--ink);
+}
+.scene-s3 .s3-readout-pct {
+  font-size: 12px;
+}
+
+.scene-s3 .image-caption {
+  max-width: 32ch;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* Bar-chart ---------------------------------------------------------------- */
+.scene-s3 .s3-chart-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(220px, 280px);
+  gap: 20px;
+  align-items: center;
+  max-width: 880px;
+  width: 100%;
+  margin: 4px auto 0;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--t-med), transform var(--t-med);
+  pointer-events: none;
+}
+.scene-s3 .s3-chart-wrap.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.scene-s3 .s3-chart-title {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+.scene-s3 .s3-chart {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 10px 12px;
+}
+.scene-s3 .s3-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.scene-s3 .s3-bars rect {
+  transition: height var(--t-med), y var(--t-med);
+}
+.scene-s3 .s3-bar-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--ink-soft);
+}
+.scene-s3 .s3-x-tick,
+.scene-s3 .s3-y-tick {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--muted);
+}
+.scene-s3 .s3-y-label {
+  font-style: italic;
+  font-size: 12px;
+  fill: var(--muted);
+}
+.scene-s3 .s3-axis-x line,
+.scene-s3 .s3-axis-y line {
+  stroke: var(--rule);
+}
+.scene-s3 .grid line {
+  stroke: var(--grid-line);
+}
+
+@media (max-width: 900px) {
+  .scene-s3 .s3-chart-wrap {
+    grid-template-columns: 1fr;
+  }
+}
