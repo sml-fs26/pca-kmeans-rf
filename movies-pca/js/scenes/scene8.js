@@ -71,6 +71,13 @@ window.scenes.scene8 = function (root) {
   svgWrap.className = 'viz-wrap s8-svg-wrap';
   stack.appendChild(svgWrap);
 
+  // Eigenviewer panel — appears after the animation finishes. PCA's two
+  // principal directions are 12-vectors; rendered as thin rating strips,
+  // they look like rating profiles of two fictional archetypal viewers.
+  const eigenPanel = document.createElement('div');
+  eigenPanel.className = 's8-eigen-panel hidden';
+  stack.appendChild(eigenPanel);
+
   const svg = d3.select(svgWrap).append('svg')
     .attr('viewBox', `0 0 ${W} ${H}`)
     .attr('preserveAspectRatio', 'xMidYMid meet')
@@ -303,6 +310,139 @@ window.scenes.scene8 = function (root) {
       .style('opacity', 0)
       .text(`PC1 explains ${v1}% · PC2 explains ${v2}% · together ${v12}%`)
       .transition().duration(500).style('opacity', 1);
+
+    showEigenviewers();
+  }
+
+  // ---- Eigenviewer panel ---------------------------------------------------
+  // PC1 and PC2 are themselves 12-vectors over the same 12 films. So each PC
+  // *is* a fictional viewer's rating profile — the "average" archetype that
+  // PCA discovered. Showing it as a rating strip makes "what does PC1 mean?"
+  // concrete: it's how this archetypal viewer would rate the 12 films.
+  let eigenPanelBuilt = false;
+  function showEigenviewers() {
+    if (!eigenPanelBuilt) buildEigenPanel();
+    eigenPanel.classList.remove('hidden');
+  }
+
+  function buildEigenPanel() {
+    eigenPanelBuilt = true;
+    eigenPanel.innerHTML = '';
+
+    const intro = document.createElement('p');
+    intro.className = 's8-eigen-intro';
+    intro.innerHTML =
+      '<strong>What ARE PC₁ and PC₂?</strong> ' +
+      'Each principal component is itself a 12-number vector over the same films. ' +
+      'Read them as the rating profiles of two fictional <em>eigenviewers</em> — ' +
+      'archetypes PCA distilled from the data.';
+    eigenPanel.appendChild(intro);
+
+    const grid = document.createElement('div');
+    grid.className = 's8-eigen-grid';
+    eigenPanel.appendChild(grid);
+
+    grid.appendChild(buildEigenRow({
+      pcLabel: 'PC₁',
+      pcVec: D.pca.pc1,
+      pcLambda: D.pca.eigenvalues[0],
+      pcVarPct: 100 * D.pca.eigenvalues[0] / D.pca.totalVariance,
+      eigenName: 'Avi',
+      eigenBlurb: 'Loves blockbusters, lukewarm on indies. Doesn\'t care much whether it\'s action or romance &mdash; only how big the budget is.',
+    }));
+
+    grid.appendChild(buildEigenRow({
+      pcLabel: 'PC₂',
+      pcVec: D.pca.pc2,
+      pcLambda: D.pca.eigenvalues[1],
+      pcVarPct: 100 * D.pca.eigenvalues[1] / D.pca.totalVariance,
+      eigenName: 'Bea',
+      eigenBlurb: 'Lives for action, allergic to romance. Indie or blockbuster — whatever, just give them a chase scene.',
+    }));
+
+    const coda = document.createElement('p');
+    coda.className = 's8-eigen-coda muted';
+    coda.innerHTML =
+      'Avi and Bea aren\'t real viewers in the dataset &mdash; they\'re the two ' +
+      'directions PCA found by analyzing the 16 real viewers\' ratings. ' +
+      'Every real viewer\'s row is well-approximated as ' +
+      '<span class="mono">x̄ + z<sub>1</sub>·Avi + z<sub>2</sub>·Bea</span> ' +
+      '— their two PC scores tell us how much of each archetype they are.';
+    eigenPanel.appendChild(coda);
+  }
+
+  function buildEigenRow({ pcLabel, pcVec, pcLambda, pcVarPct, eigenName, eigenBlurb }) {
+    const row = document.createElement('div');
+    row.className = 's8-eigen-row';
+
+    const head = document.createElement('div');
+    head.className = 's8-eigen-head';
+    head.innerHTML =
+      `<span class="s8-eigen-pc mono">${pcLabel}</span>` +
+      `<span class="s8-eigen-name">&ldquo;${eigenName}&rdquo;</span>` +
+      `<span class="s8-eigen-meta muted mono">` +
+        `λ = ${pcLambda.toFixed(2)} &middot; ${pcVarPct.toFixed(1)}% variance` +
+      `</span>`;
+    row.appendChild(head);
+
+    const blurb = document.createElement('p');
+    blurb.className = 's8-eigen-blurb';
+    blurb.innerHTML = eigenBlurb;
+    row.appendChild(blurb);
+
+    const stripWrap = document.createElement('div');
+    stripWrap.className = 's8-eigen-strip-wrap';
+    row.appendChild(stripWrap);
+
+    // Re-order PC entries to match the heatmap's sortedColOrder, so the
+    // user can compare against the same column layout shown above.
+    const maxAbs = Math.max(...pcVec.map(Math.abs));
+    sortedCols.forEach(mIdx => {
+      const cell = document.createElement('div');
+      cell.className = 's8-eigen-cell';
+      const v = pcVec[mIdx];
+      const t = v / (maxAbs || 1);  // -1..1
+      cell.style.background = divergingColor(t);
+      cell.title = `${D.movies[mIdx].title}: ${v.toFixed(3)}`;
+      stripWrap.appendChild(cell);
+    });
+
+    // Movie title labels under the strip.
+    const labels = document.createElement('div');
+    labels.className = 's8-eigen-labels';
+    sortedCols.forEach(mIdx => {
+      const tag = document.createElement('span');
+      tag.className = 's8-eigen-mlabel';
+      tag.textContent = shortTitle(D.movies[mIdx].title);
+      labels.appendChild(tag);
+    });
+    row.appendChild(labels);
+
+    return row;
+  }
+
+  function divergingColor(t) {
+    // t in [-1, 1] → CSS rgb. Negative → blue, zero → cream, positive → red.
+    // We read CSS variables so the panel respects the active theme.
+    const root = document.documentElement;
+    const cs = getComputedStyle(root);
+    const parseRGB = (name, fallback) => {
+      const v = (cs.getPropertyValue(name) || '').trim();
+      const m = v.match(/^#([0-9a-f]{6})$/i);
+      if (m) return [parseInt(m[1].slice(0, 2), 16), parseInt(m[1].slice(2, 4), 16), parseInt(m[1].slice(4, 6), 16)];
+      return fallback;
+    };
+    const neg = parseRGB('--diverging-neg', [47, 108, 177]);
+    const mid = parseRGB('--diverging-mid', [240, 238, 232]);
+    const pos = parseRGB('--diverging-pos', [184, 50, 58]);
+    const u = Math.max(-1, Math.min(1, t));
+    let rgb;
+    if (u >= 0) {
+      rgb = mid.map((m, i) => Math.round(m + (pos[i] - m) * u));
+    } else {
+      rgb = mid.map((m, i) => Math.round(m + (neg[i] - m) * (-u)));
+    }
+    return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
   }
 
   function runAnimation() {
@@ -360,6 +500,7 @@ window.scenes.scene8 = function (root) {
 
   replayBtn.addEventListener('click', () => {
     gPlane.selectAll('.s8-variance-text').remove();
+    eigenPanel.classList.add('hidden');
     runAnimation();
   });
 
@@ -389,6 +530,7 @@ window.scenes.scene8 = function (root) {
       gPlane.selectAll('.s8-variance-text').remove();
       projectBtn.classList.remove('hidden');
       replayBtn.classList.add('hidden');
+      eigenPanel.classList.add('hidden');
       cursor = 1;
     },
     onLeave() {

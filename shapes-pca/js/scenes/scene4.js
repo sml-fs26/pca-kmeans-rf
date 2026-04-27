@@ -72,10 +72,10 @@ window.scenes.scene4 = function (root) {
     return op;
   }
 
-  const cellMean = makeCell('\\mu');
+  const cellMean = makeCell('\\mu \\;\\text{(mean image)}');
   const cellA1   = makeCell('\\alpha_1\\, v_1');
   const cellA2   = makeCell('\\alpha_2\\, v_2');
-  const cellRec  = makeCell('\\hat{x}');
+  const cellRec  = makeCell('\\hat{x} \\;\\text{(reconstruction)}');
 
   eqStrip.appendChild(cellMean.root);
   eqStrip.appendChild(makeOp('+'));
@@ -94,6 +94,25 @@ window.scenes.scene4 = function (root) {
     '<em>Every image in the dataset is the mean image plus a multiple of the circle ' +
     'and a multiple of the square. Two numbers.</em>';
   left.appendChild(stripCaption);
+
+  // Color legend — explains the diverging red/blue palette used in the αv panels.
+  const legend = document.createElement('div');
+  legend.className = 's4-legend';
+  legend.innerHTML =
+    '<span class="s4-legend-title">Reading the αv panels</span>' +
+    '<div class="s4-legend-row">' +
+      '<span class="s4-swatch s4-swatch-pos"></span>' +
+      '<span class="s4-legend-text"><span class="mono">α &gt; 0</span> &middot; pixels glow <em>red</em> — that shape gets <em>added</em>.</span>' +
+    '</div>' +
+    '<div class="s4-legend-row">' +
+      '<span class="s4-swatch s4-swatch-neg"></span>' +
+      '<span class="s4-legend-text"><span class="mono">α &lt; 0</span> &middot; pixels glow <em>blue</em> — that shape gets <em>subtracted</em>.</span>' +
+    '</div>' +
+    '<div class="s4-legend-row">' +
+      '<span class="s4-swatch s4-swatch-zero"></span>' +
+      '<span class="s4-legend-text"><span class="mono">α = 0</span> &middot; nothing added. The reconstruction is exactly μ &mdash; gray, because μ is half-circle + half-square.</span>' +
+    '</div>';
+  left.appendChild(legend);
 
   // ---- Right column: sliders, formula, sample button -----------------------
   const right = document.createElement('div');

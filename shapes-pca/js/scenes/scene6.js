@@ -159,9 +159,9 @@ window.scenes.scene6 = function (root) {
     // Axes — drawn last so they sit on top.
     const gAxes = svg.append('g').attr('class', 's6-axes');
     const axisDefs = [
-      { name: 'a', tip: proj(1, 0, 0) },
-      { name: 'b', tip: proj(0, 1, 0) },
-      { name: 'c', tip: proj(0, 0, 1) },
+      { name: 'a (circle)',   tip: proj(1, 0, 0) },
+      { name: 'b (square)',   tip: proj(0, 1, 0) },
+      { name: 'c (triangle)', tip: proj(0, 0, 1) },
     ];
     const origin = proj(0, 0, 0);
     axisDefs.forEach(ax => {
@@ -266,6 +266,29 @@ window.scenes.scene6 = function (root) {
     return wrap;
   }
 
+  function buildSignedLegend() {
+    const wrap = document.createElement('div');
+    wrap.className = 's6-signed-legend';
+    wrap.innerHTML =
+      '<div class="s6-legend-title">Reading the eigen-images</div>' +
+      '<div class="s6-legend-grid">' +
+        '<div class="s6-legend-row">' +
+          '<span class="s6-legend-bar"></span>' +
+          '<span class="s6-legend-text">' +
+            '<strong class="s6-legend-strong-neg">deep blue</strong> &mdash; large negative entry' +
+            ' &middot; <span class="muted">cream &mdash; near zero</span> &middot; ' +
+            '<strong class="s6-legend-strong-pos">deep red</strong> &mdash; large positive entry' +
+          '</span>' +
+        '</div>' +
+        '<p class="s6-legend-caption">' +
+          'Hue tells you the <em>sign</em> of the pixel; intensity tells you the ' +
+          '<em>magnitude</em>. A pure circle would be all red; a contrast like ' +
+          '<span class="mono">v<sub>2</sub></span> shows red where one shape lives and blue where the other does.' +
+        '</p>' +
+      '</div>';
+    return wrap;
+  }
+
   function buildEigenImagesRow() {
     const row = document.createElement('div');
     row.className = 's6-eigen-row';
@@ -325,20 +348,30 @@ window.scenes.scene6 = function (root) {
       rightSlot.appendChild(fb);
     } else if (cursor === 2) {
       subhead.innerHTML =
-        '<em>All 200 samples sit on a single 2D plane in coefficient space.</em>';
+        '<em>Every dot is one of the 200 images, plotted at its coefficient triple ' +
+        '<span class="mono">(a, b, c)</span>. They all lie on the same tilted 2D plane.</em>';
       leftCol.appendChild(buildScatter3D());
+
+      const explainer = document.createElement('div');
+      explainer.className = 's6-explainer';
+      explainer.innerHTML =
+        '<span class="s6-explainer-title">How to read the cube</span>' +
+        '<ul class="s6-explainer-list">' +
+          '<li><span class="mono">a</span> &mdash; how much <em>circle</em> went into this image.</li>' +
+          '<li><span class="mono">b</span> &mdash; how much <em>square</em>.</li>' +
+          '<li><span class="mono">c</span> &mdash; how much <em>triangle</em>, but ' +
+            '<span class="mono">c &asymp; 0.5·a + 0.5·b</span>, so this axis is ' +
+            'almost determined by the other two.</li>' +
+        '</ul>' +
+        '<p class="s6-explainer-coda">The dots aren&rsquo;t scattered through the cube &mdash; ' +
+        'they&rsquo;re trapped on a single tilted plane. ' +
+        'PCA only needs <em>two</em> directions to describe them.</p>';
+      rightSlot.appendChild(explainer);
 
       const fb = document.createElement('div');
       fb.className = 'formula-block s6-formula';
       renderKatex(fb, '\\mathrm{rank}\\,\\Sigma_{\\text{coeff}} \\,\\approx\\, 2', true);
       rightSlot.appendChild(fb);
-
-      const sb = document.createElement('div');
-      sb.className = 'sidebar-note s6-sidebar';
-      sb.innerHTML =
-        '<span class="sidebar-title">A 2D plane in ℝ³.</span>' +
-        'All 200 points sit on the same 2D plane. The third coordinate is determined by the first two.';
-      rightSlot.appendChild(sb);
     } else if (cursor === 3) {
       subhead.innerHTML =
         '<em>PCA confirms it: only two directions carry real variance.</em>';
@@ -350,6 +383,7 @@ window.scenes.scene6 = function (root) {
       // Move the eigen-images into the left (which has more room) and put a
       // callout on the right.
       leftCol.appendChild(buildEigenImagesRow());
+      leftCol.appendChild(buildSignedLegend());
 
       const callout = document.createElement('div');
       callout.className = 'callout s6-callout';

@@ -87,13 +87,18 @@ window.scenes.scene7 = function (root) {
       lede.innerHTML = 'Find the directions in 12-D film-space along which the data varies most. The eigenvectors of <span class="mono">Σ</span> with the largest eigenvalues — that\'s where the variance lives.';
       formula.classList.remove('hidden');
       renderKatex(formula, '\\Sigma\\,v_k = \\lambda_k\\,v_k, \\qquad \\lambda_1 \\geq \\lambda_2 \\geq \\dots \\geq \\lambda_{12} \\geq 0');
-      annotation.innerHTML = `Take <span class="mono">V = [v₁\\, v₂]</span>: the top two eigenvectors. Each is a direction in 12-D film-space.`;
+      annotation.innerHTML =
+        `Stack the top two eigenvectors side-by-side as columns &mdash; ` +
+        `that's <span class="mono">V = [\\,v<sub>1</sub>\\;\\;v<sub>2</sub>\\,]</span>, ` +
+        `a 12 × 2 matrix. The two columns are the basis of the 2-D plane PCA discovered.`;
     } else if (c === 5) {
       heading.textContent = 'Step 4 — project.';
       lede.textContent = 'For every viewer, compute their coordinate along v₁ and v₂. That\'s the 2D representation.';
       formula.classList.remove('hidden');
       renderKatex(formula, 'z_u = V^{\\top}(x_u - \\bar{x}) \\in \\mathbb{R}^{2}');
-      annotation.innerHTML = `Each viewer's 12-D rating row becomes a 2-D point. PCA discovered the axes; next scene shows what they look like.`;
+      annotation.innerHTML =
+        `<span class="mono">V</span> is the 12 × 2 matrix from the previous step (its columns are <span class="mono">v<sub>1</sub></span> and <span class="mono">v<sub>2</sub></span>). ` +
+        `<span class="mono">V<sup>⊤</sup></span> is 2 × 12, so multiplying it by the centered rating row collapses 12 numbers into <em>two</em> &mdash; the viewer's PC<sub>1</sub> and PC<sub>2</sub> scores.`;
     }
   }
 

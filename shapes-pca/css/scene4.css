@@ -69,6 +69,49 @@
   max-width: 60ch;
 }
 
+/* Color legend for the diverging-palette αv panels --------------------------- */
+.scene-s4 .s4-legend {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 60ch;
+}
+.scene-s4 .s4-legend-title {
+  font-size: 12px;
+  font-family: "SF Mono", "Menlo", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.scene-s4 .s4-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.scene-s4 .s4-swatch {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+  flex: 0 0 auto;
+}
+.scene-s4 .s4-swatch-pos { background: var(--diverging-pos); }
+.scene-s4 .s4-swatch-neg { background: var(--diverging-neg); }
+.scene-s4 .s4-swatch-zero { background: var(--diverging-mid); }
+.scene-s4 .s4-legend-text em {
+  font-style: italic;
+  color: var(--ink);
+}
+
 /* Right column: controls --------------------------------------------------- */
 .scene-s4 .s4-right {
   gap: 14px;

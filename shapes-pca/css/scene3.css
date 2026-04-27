@@ -25,6 +25,68 @@
   font-size: 14px;
 }
 
+/* PCA recipe block --------------------------------------------------------- */
+.scene-s3 .s3-recipe {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 14px 18px 12px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.scene-s3 .s3-recipe-title {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.scene-s3 .s3-recipe-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.scene-s3 .s3-recipe-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.scene-s3 .s3-recipe-num {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  position: relative;
+  top: 2px;
+}
+.scene-s3 .s3-recipe-text em {
+  color: var(--ink);
+  font-style: italic;
+}
+.scene-s3 .s3-recipe-coda {
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* In step 3, hide the recipe + chart sidebar on the chart explainer step */
+.scene-s3 .s3-layout.is-step3 .s3-recipe { display: none; }
+
 /* Sample strip ------------------------------------------------------------- */
 .scene-s3 .s3-strip-wrap {
   display: flex;

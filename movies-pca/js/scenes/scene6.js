@@ -182,13 +182,15 @@ window.scenes.scene6 = function (root) {
   function renderExplain(uIdx) {
     if (uIdx == null) {
       explain.innerHTML = `
-        <div class="s6-formula formula-block">
-          <span data-katex="\\text{action}_u = \\tfrac{1}{12}\\sum_{f} r_{u,f}\\,\\mathrm{sign}(f\\text{ is action})" data-display="true"></span>
-          <span data-katex="\\text{block}_u = \\tfrac{1}{12}\\sum_{f} r_{u,f}\\,\\mathrm{sign}(f\\text{ is blockbuster})" data-display="true"></span>
-        </div>
-        <p class="muted s6-prompt">Each viewer's rating row collapses to two numbers — and one point on the plane.</p>
+        <p class="s6-blurb">
+          Suppose &mdash; just for now &mdash; we already know which films are
+          action and which are blockbusters. Then a viewer's
+          <em>action score</em> is the average of how high they rate
+          action films minus how high they rate romance ones; the
+          <em>blockbuster score</em> works the same way along the other axis.
+        </p>
+        <p class="muted s6-prompt">Each viewer's 12-number rating row collapses to two numbers &mdash; and one point on the plane.</p>
       `;
-      renderKatexIn(explain);
       return;
     }
     const u = D.users[uIdx];

@@ -81,10 +81,16 @@ kbd {
   .scrolly { grid-template-columns: 1fr; }
 }
 
-/* VIZ COLUMN — sticky */
+/* VIZ COLUMN — sticky.
+   `align-self: start` is essential: without it, CSS Grid's default
+   `align-items: stretch` makes this column fill the entire grid row
+   (~13 × 100vh of scenes). Sticky positioning then has no room to
+   actually stick — the column already covers the whole scrolly, and
+   the viz appears to vanish after the hero. */
 .viz-column {
   position: sticky;
   top: 0;
+  align-self: start;
   height: 100vh;
   display: flex;
   flex-direction: column;

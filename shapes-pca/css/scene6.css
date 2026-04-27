@@ -138,3 +138,101 @@
 .scene-s6 .s6-formula {
   margin: 4px 0;
 }
+
+/* ---- Step 2 explainer card ---- */
+.scene-s6 .s6-explainer {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.scene-s6 .s6-explainer-title {
+  display: block;
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.scene-s6 .s6-explainer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.scene-s6 .s6-explainer-list li {
+  line-height: 1.5;
+}
+.scene-s6 .s6-explainer-list em {
+  color: var(--ink);
+  font-style: italic;
+}
+.scene-s6 .s6-explainer-coda {
+  margin: 8px 0 0;
+  font-style: italic;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.scene-s6 .s6-explainer-coda em {
+  color: var(--ink);
+}
+
+/* ---- Step 4 diverging-palette legend ---- */
+.scene-s6 .s6-signed-legend {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  max-width: 540px;
+  width: 100%;
+}
+.scene-s6 .s6-legend-title {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.scene-s6 .s6-legend-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.scene-s6 .s6-legend-bar {
+  display: block;
+  height: 14px;
+  border-radius: 3px;
+  background: linear-gradient(to right,
+    var(--diverging-neg) 0%,
+    var(--diverging-mid) 50%,
+    var(--diverging-pos) 100%);
+  border: 1px solid var(--rule);
+}
+.scene-s6 .s6-legend-text {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.scene-s6 .s6-legend-strong-pos { color: var(--diverging-pos); font-weight: 600; }
+.scene-s6 .s6-legend-strong-neg { color: var(--diverging-neg); font-weight: 600; }
+.scene-s6 .s6-legend-caption {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.scene-s6 .s6-legend-caption em {
+  color: var(--ink);
+  font-style: italic;
+}
+
+/* Bump axis-label legibility now that they include shape names */
+.scene-s6 .s6-axis-label { font-size: 3.6px; }

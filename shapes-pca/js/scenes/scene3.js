@@ -47,6 +47,33 @@ window.scenes.scene3 = function (root) {
   `;
   layout.appendChild(header);
 
+  // PCA recipe — three steps the algorithm performs on the linearized images.
+  const recipe = document.createElement('div');
+  recipe.className = 's3-recipe';
+  recipe.innerHTML = `
+    <div class="s3-recipe-title">What PCA does, on this dataset</div>
+    <ol class="s3-recipe-list">
+      <li><span class="s3-recipe-num">1</span>
+          <span class="s3-recipe-text">Stack all 200 linearized images into a matrix
+          <span class="mono">X</span> (200 × 1024) and subtract the mean row.</span></li>
+      <li><span class="s3-recipe-num">2</span>
+          <span class="s3-recipe-text">Form the
+          <em>covariance matrix</em> of the pixels,
+          <span class="mono">Σ = (1/n) X̃ᵀ X̃</span> &mdash; a 1024 × 1024 matrix.</span></li>
+      <li><span class="s3-recipe-num">3</span>
+          <span class="s3-recipe-text">Compute its
+          <em>eigenvectors</em> <span class="mono">v<sub>i</sub></span> and
+          <em>eigenvalues</em> <span class="mono">λ<sub>i</sub></span>. Each
+          <span class="mono">v<sub>i</sub></span> is a 1024-vector &mdash; an image
+          itself. Each <span class="mono">λ<sub>i</sub></span> is the variance the
+          dataset has along that direction.</span></li>
+    </ol>
+    <p class="s3-recipe-coda muted">For this dataset, only two eigenvalues are non-zero
+    &mdash; the data lives on a 2D plane in pixel space. The two eigen-images
+    are below.</p>
+  `;
+  layout.appendChild(recipe);
+
   // Sample-strip — 6 tiny images, always visible, anchors the dataset
   const stripWrap = document.createElement('div');
   stripWrap.className = 's3-strip-wrap';
@@ -119,9 +146,19 @@ window.scenes.scene3 = function (root) {
 
   const chartNote = document.createElement('div');
   chartNote.className = 'sidebar-note s3-note';
+  const totalVar = variant.eigenvals.reduce((a, b) => a + b, 0);
+  const pct1 = ((variant.eigenvals[0] / totalVar) * 100).toFixed(1);
+  const pct2 = ((variant.eigenvals[1] / totalVar) * 100).toFixed(1);
   chartNote.innerHTML =
-    `<span class="sidebar-title">A flat 2-D world</span>` +
-    `The other 1022 directions in pixel space have variance zero — there is nothing else to discover.`;
+    `<span class="sidebar-title">What does &ldquo;% of variance&rdquo; mean?</span>` +
+    `<p>Total variance in the dataset is just the sum of all eigenvalues, ` +
+    `<span class="mono">Σ<sub>j</sub> λ<sub>j</sub> = ${totalVar.toFixed(2)}</span>. ` +
+    `The percentage on each bar is its share of that total &mdash; ` +
+    `<span class="mono">λ<sub>i</sub> / Σ<sub>j</sub> λ<sub>j</sub></span>.</p>` +
+    `<p>Here <span class="mono">v<sub>1</sub></span> carries ` +
+    `<span class="mono">${pct1}%</span>, <span class="mono">v<sub>2</sub></span> the remaining ` +
+    `<span class="mono">${pct2}%</span>. The other 1022 directions are exactly zero &mdash; ` +
+    `there is nothing else to discover.</p>`;
   chartWrap.appendChild(chartNote);
 
   drawBarChart(chartHost, variant.eigenvals);

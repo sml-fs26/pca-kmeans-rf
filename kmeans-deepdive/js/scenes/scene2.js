@@ -221,23 +221,23 @@ window.scenes.scene2 = function (root) {
       case 1:
         return {
           pill: 'Step 1 of 5',
-          html: `<p>Imagine k-means already made one pass: each point belongs to its nearest centroid. We'll explain <em>how</em> later. Right now, focus on what we're trying to make small.</p>`
+          html: `<p>We start by dropping <span class="mono">K</span> centroids into random positions. (Here <span class="mono">K = 3</span>.) These will be the cluster representatives &mdash; but right now they&rsquo;re just placed somewhere.</p>`
         };
       case 2:
         return {
           pill: 'Step 2 of 5',
-          html: `<p>K centroids. Every point colored by which centroid it's closest to.</p>`
+          html: `<p>Color every point by which centroid is closest to it. The space splits into <span class="mono">K</span> regions &mdash; one per centroid.</p>`
         };
       case 3:
         return {
           pill: 'Step 3 of 5',
-          html: `<p>From every point, draw a line to its centroid. The squared length of that line is one term in J.</p>`
+          html: `<p>From every point, draw a line to its nearest centroid. The <em>squared</em> length of that line is one term in the loss function we&rsquo;re going to minimize.</p>`
         };
       case 4:
         return {
           pill: 'Step 4 of 5',
           html: `
-            <p>Sum the squared lengths within each cluster…</p>
+            <p>The loss is the sum of those squared lengths &mdash; summed inside each cluster, then across all clusters.</p>
             <div class="formula-block"><span data-katex="J_{C_k} = \\sum_{x \\in C_k} \\|x - \\mu_k\\|^2" data-display="true"></span></div>
             <p class="s2-partial-sum"><span class="ps-label">Cluster 1 partial:</span><span class="mono">${clusterJ[0].toFixed(2)}</span></p>`
         };
@@ -246,6 +246,7 @@ window.scenes.scene2 = function (root) {
           pill: 'Step 5 of 5',
           html: `
             <div class="formula-block"><span data-katex="J = \\sum_{k=1}^{K} \\sum_{x \\in C_k} \\|x - \\mu_k\\|^2" data-display="true"></span></div>
+            <p><span class="mono">J</span> is k-means&rsquo; loss function. It measures how tightly each cluster huddles around its centroid &mdash; small when points sit close to their representative, large when they&rsquo;re spread out.</p>
             <p>k-means is the algorithm that makes <span class="mono">J</span> small. Everything from here is about that.</p>
             <p class="muted" style="font-size:13px">Total J = <span class="mono">${totalJ.toFixed(2)}</span></p>`
         };
@@ -258,13 +259,13 @@ window.scenes.scene2 = function (root) {
 
   function applyStep(c) {
     if (c === 1) {
+      // Step 1 — neutral points + centroids dropped in their starting positions.
       drawPointsNeutral();
+      drawCentroids();
     } else if (c === 2) {
-      // Voronoi partition appears with the centroids — emphasizes that the
-      // partition is a function of the centroid positions.
+      // Step 2 — partition the plane and color points by their nearest centroid.
       drawVoronoi(true);
       recolorPointsByAssignment();
-      drawCentroids();
     } else if (c === 3) {
       drawLines(true);
     } else if (c === 4) {

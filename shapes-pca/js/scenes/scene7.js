@@ -162,9 +162,11 @@ window.scenes.scene7 = function (root) {
   rightCol.appendChild(formula);
   renderKatex(
     formula,
-    '\\Sigma_{(a,b)} = \\sigma^2 \\begin{bmatrix} 1 & \\rho \\\\ \\rho & 1 \\end{bmatrix}, \\quad ' +
-    'v_1 = \\tfrac{1}{\\sqrt{2}}\\!\\begin{pmatrix}1\\\\1\\end{pmatrix}, \\quad ' +
-    'v_2 = \\tfrac{1}{\\sqrt{2}}\\!\\begin{pmatrix}1\\\\-1\\end{pmatrix}',
+    '\\begin{gathered}' +
+    '\\Sigma_{(a,b)} \\;=\\; \\sigma^2 \\begin{bmatrix} 1 & \\rho \\\\ \\rho & 1 \\end{bmatrix} \\\\[10pt]' +
+    'v_1 \\;=\\; \\frac{1}{\\sqrt{2}}\\, \\begin{pmatrix} 1 \\\\ 1 \\end{pmatrix} \\qquad ' +
+    'v_2 \\;=\\; \\frac{1}{\\sqrt{2}}\\, \\begin{pmatrix} 1 \\\\ -1 \\end{pmatrix}' +
+    '\\end{gathered}',
     true
   );
 

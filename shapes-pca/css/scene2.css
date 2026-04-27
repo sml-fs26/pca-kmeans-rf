@@ -23,30 +23,90 @@
 .scene-s2 .s2-heading { margin-bottom: 0; }
 .scene-s2 .s2-lede { margin-bottom: 4px; }
 
-.scene-s2 .s2-image-stage {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+/* ---- Animation stage ----------------------------------------------------- */
+
+/* Layout constants for the animation. The stage is a 480 × 320 box with the
+ * 32 row-canvases positioned absolutely. In the 'image' state they form a
+ * 256 × 256 grid; in the 'strip' state they slide and squish into a single
+ * 480 × 4 horizontal strip near the bottom. */
+.scene-s2 .s2-anim-stage {
+  --stage-w: 480px;
+  --stage-h: 320px;
+  --img-w: 256px;
+  --img-h: 256px;
+  --img-x: calc((var(--stage-w) - var(--img-w)) / 2);  /* 112 */
+  --img-y: 16px;
+  --row-h: 8px;          /* 256 / 32 */
+  --strip-y: 290px;
+  --strip-row-w: 15px;   /* 480 / 32 */
+  --strip-row-h: 4px;
+  --strip-x0: 0px;       /* row-0 x at strip state */
+  --scale-x: 0.05859375; /* strip-row-w / img-w = 15/256 */
+  --scale-y: 0.5;        /* strip-row-h / row-h = 4/8 */
+
+  position: relative;
+  width: var(--stage-w);
+  max-width: 100%;
+  height: var(--stage-h);
+  margin: 0 auto;
   background: var(--panel);
   border: 1px solid var(--rule);
   border-radius: 4px;
-  padding: 14px 16px;
-  min-width: 0;
+  overflow: hidden;
 }
 
-.scene-s2 .s2-image-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.scene-s2 .s2-strip-stack {
+/* In stack mode the stage hosts a regular vertical flow instead. */
+.scene-s2 .s2-anim-stage.is-stack {
+  width: 100%;
+  max-width: 640px;
+  height: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 0;
+  padding: 14px 16px;
+  overflow: visible;
 }
+
+/* Row canvases — base styling shared by image / fanned / strip states. */
+.scene-s2 .s2-anim-stage > .s2-row {
+  position: absolute;
+  width: var(--img-w);
+  height: var(--row-h);
+  left: var(--img-x);
+  top: var(--img-y);
+  transform-origin: top left;
+  transform: translate(0, calc(var(--row-idx) * var(--row-h)));
+  transition: transform 600ms cubic-bezier(.4, .15, .2, 1);
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: var(--image-bg);
+}
+
+/* 'Fanned' — a brief beat where rows offset slightly so the eye registers
+ * them as separate horizontal slices before they fly apart. */
+.scene-s2 .s2-anim-stage.is-fanned > .s2-row {
+  transform: translate(
+    calc((var(--row-idx) - 15.5) * 1px),
+    calc(var(--row-idx) * var(--row-h))
+  );
+}
+
+/* 'Strip' — rows translated and scaled so they form a single thin row at
+ * the bottom of the stage. The maths:
+ *   target left = row-idx * strip-row-w  (so x-offset = row-idx * w − img-x)
+ *   target top  = strip-y                (so y-offset = strip-y − row-idx * row-h − img-y)
+ *   scale = (scale-x, scale-y)
+ */
+.scene-s2 .s2-anim-stage.is-strip > .s2-row {
+  transform:
+    translate(
+      calc(var(--row-idx) * var(--strip-row-w) - var(--img-x)),
+      calc(var(--strip-y) - var(--img-y) - var(--row-idx) * var(--row-h))
+    )
+    scale(var(--scale-x), var(--scale-y));
+}
+
+/* ---- Stack state (steps 2-3) -------------------------------------------- */
 
 .scene-s2 .s2-strip-row {
   display: grid;
@@ -66,9 +126,35 @@
   display: block;
   width: 100%;
   height: 12px;
-  border: 1px solid var(--image-frame);
+  border: 1px solid var(--image-frame, var(--rule));
   border-radius: 2px;
   background: var(--image-bg);
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* The composite strip — 32 row canvases laid out as a single thin strip,
+ * indistinguishable on screen from a 1024×1 canvas. Used as the x_0 row
+ * in the stacked-strips layout. */
+.scene-s2 .s2-composite-strip {
+  display: grid;
+  grid-template-columns: repeat(32, 1fr);
+  height: 12px;
+  border: 1px solid var(--image-frame, var(--rule));
+  border-radius: 2px;
+  background: var(--image-bg);
+  min-width: 0;
+}
+
+.scene-s2 .s2-composite-strip > .s2-row {
+  position: static;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: none;
+  transition: none;
+  border: 0;
+  background: transparent;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
@@ -83,11 +169,12 @@
   letter-spacing: 0.05em;
 }
 
-.scene-s2 .s2-strip-caption {
+.scene-s2 .s2-stage-caption {
   text-align: center;
   color: var(--muted);
   font-family: "Iowan Old Style", "Palatino", Georgia, serif;
   font-size: 13px;
+  margin-top: 4px;
 }
 
 /* Right column. */
@@ -132,4 +219,10 @@
   color: var(--ink);
   background: linear-gradient(transparent 60%, var(--panel-hover) 60%);
   padding: 0 3px;
+}
+
+@media (max-width: 720px) {
+  .scene-s2 .s2-anim-stage {
+    --stage-w: 100%;
+  }
 }

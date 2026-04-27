@@ -208,7 +208,7 @@ window.scenes.scene5 = function (root) {
       const n1 = clusterPoints[0].length;
       renderKatex(
         fb,
-        `\\mu_1 = \\frac{1}{${n1}} (x_{a} + x_{b} + \\cdots + x_{${n1 > 1 ? 'n' : 'a'}})`,
+        `\\mu_1 \\;=\\; \\frac{1}{${n1}} \\sum_{x \\in C_1} x`,
         true
       );
       slot.appendChild(fb);
@@ -264,17 +264,7 @@ window.scenes.scene5 = function (root) {
       return;
     }
 
-    if (state.cursor === 6 || state.cursor === 7) {
-      const callout = document.createElement('div');
-      callout.className = 'callout';
-      callout.innerHTML =
-        `<div class="callout-title">Why the mean and not the median?</div>` +
-        `<p>For squared-distance loss (<span class="mono">L²</span>), the centroid is the mean. ` +
-        `If we used absolute-distance loss (<span class="mono">L¹</span>), the centroid would be the ` +
-        `geometric median — that variant is called <strong>k-medians</strong>. Different distance, ` +
-        `different update rule. Same skeleton.</p>`;
-      slot.appendChild(callout);
-    }
+    // (Removed: the "why the mean and not the median?" sidebar.)
 
     if (state.cursor === 7) {
       const sb = document.createElement('div');
