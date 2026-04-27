@@ -1,0 +1,20 @@
+/* moons scenes — scenes 1 (hook) and 2 (depth dial). */
+
+svg .gt-curve {
+  stroke: var(--neutral);
+  stroke-linecap: round;
+}
+
+svg .frame {
+  shape-rendering: crispEdges;
+}
+
+/* Region cells styled in style.css via .region-1 / .region-2.
+   Crisp edges keep cell boundaries sharp at small sizes. */
+svg .regions-layer rect.region-cell {
+  shape-rendering: crispEdges;
+}
+
+svg .splits-layer line.split-line {
+  stroke-linecap: square;
+}

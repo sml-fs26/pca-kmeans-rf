@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The forest grows. — Random Forests · SML</title>
+  <link rel="stylesheet" href="vendor/katex.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/treeBuilder.css">
+  <link rel="stylesheet" href="css/marblesMtry.css">
+  <link rel="stylesheet" href="css/forest.css">
+  <link rel="stylesheet" href="css/formula.css">
+  <link rel="stylesheet" href="css/similarity.css">
+  <link rel="stylesheet" href="css/importance.css">
+</head>
+<body>
+
+  <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+    <span class="theme-label-light">Light</span><span class="theme-sep">/</span><span class="theme-label-dark">Dark</span>
+  </button>
+
+  <header class="hero">
+    <h1>The forest grows.</h1>
+    <p class="subtitle">How averaging dumb trees beats one smart one — an illustrated tour of random forests, on Palmer penguins.</p>
+    <p class="hint">Scroll, or press <kbd>→</kbd> · <kbd>t</kbd> for theme</p>
+  </header>
+
+  <main class="scrolly">
+    <!-- STICKY VIZ COLUMN -->
+    <div class="viz-column">
+      <div class="viz-stage">
+        <svg id="viz" aria-label="Random forest visualization"></svg>
+        <div id="viz-overlay" class="viz-overlay"></div>
+      </div>
+      <div id="viz-controls" class="viz-controls"></div>
+      <div id="viz-readout" class="viz-readout"></div>
+    </div>
+
+    <!-- PROSE COLUMN -->
+    <div class="prose-column">
+
+      <article class="scene" data-scene="1" data-viz="treeBuilder" data-sub="singleOverfit">
+        <h2>One tree is a brittle expert.</h2>
+        <p>A decision tree splits the plane with axis-aligned cuts until every training point sits in its own pure region. Watch one grow.</p>
+        <p>It's never wrong on training data. That's the problem — the slivers chasing single points won't survive on data the tree hasn't seen.</p>
+      </article>
+
+      <article class="scene" data-scene="2" data-viz="treeBuilder" data-sub="fiveBootstraps">
+        <h2>A second tree disagrees.</h2>
+        <p>Resample the training rows with replacement. Regrow the tree. The boundary moves — sometimes a lot. Repeat five times.</p>
+        <p>The shared signal emerges where the trees agree. The disagreement concentrates near the true class boundary. That disagreement is information.</p>
+      </article>
+
+      <article class="scene" data-scene="3" data-viz="marblesMtry" data-sub="bootstrap">
+        <h2>Where the diversity comes from. Part 1: the bootstrap.</h2>
+        <p>Each tree trains on its own resample of the data — N rows drawn with replacement from the original N. Some rows show up twice or three times. About 37% don't show up at all.</p>
+        <p>Those rows are <em>out of bag</em>. They've never been seen by this tree, so its prediction on them is honest — held-out validation, for free, with no separate test set.</p>
+      </article>
+
+      <article class="scene" data-scene="4" data-viz="marblesMtry" data-sub="mtry">
+        <h2>Part 2: feature randomness.</h2>
+        <p>At every split, the tree only gets to look at a random subset of <code>mtry</code> features. Without this restriction, every tree would always pick the strongest feature first — and they'd all look alike.</p>
+        <p>Drag <code>mtry</code> below to watch the tree shape change.</p>
+      </article>
+
+      <article class="scene" data-scene="5" data-viz="forest" data-sub="grove">
+        <h2>The grove.</h2>
+        <p>One hundred trees, each grown from its own bootstrap, each given a random subset of features at every split. Hover any tree to see its decision boundary alone.</p>
+        <p>No two are quite the same. They're a parliament of weak voters.</p>
+      </article>
+
+      <article class="scene" data-scene="6" data-viz="forest" data-sub="bSlider">
+        <h2>More trees, less variance.</h2>
+        <p>Drag <code>B</code> from 1 to 100. Watch test accuracy climb as the predictions of new trees average in. Training accuracy never moves — it's pinned at 1.0 because the trees are deep enough to memorize.</p>
+        <p>After about 30 trees the curve plateaus. Adding more trees can't push past the floor set by tree correlation.</p>
+      </article>
+
+      <article class="scene" data-scene="7" data-viz="forest" data-sub="voting">
+        <h2>How a single prediction is made.</h2>
+        <p>A new query point falls onto the plane. Each of the 100 trees follows its own root-to-leaf path and casts a vote. The forest predicts the majority class; the probability is the vote share.</p>
+        <p>Drag the point. Near a class boundary the votes split — that's how you read uncertainty out of a forest.</p>
+      </article>
+
+      <article class="scene" data-scene="8" data-viz="formula" data-sub="variance">
+        <h2>The math behind &ldquo;more trees, less variance.&rdquo;</h2>
+        <p>The variance of an averaged prediction over <code>B</code> trees with single-tree variance σ² and pairwise correlation ρ is</p>
+        <div class="math-inline" id="prose-formula"></div>
+        <p>Drag <code>B</code> and <code>ρ</code>. As <code>B → ∞</code> only the term proportional to ρ survives — that's the floor. Lower <code>mtry</code> drops ρ and lowers the floor, but the trees themselves get weaker. The forest lives in this tradeoff.</p>
+      </article>
+
+      <article class="scene" data-scene="9" data-viz="similarity" data-sub="mds">
+        <h2>How many distinct voices live in 100 trees?</h2>
+        <p>For any two trees, count the fraction of training rows they route to the same leaf-equivalence class. Use that as a similarity. Embed all 100 trees in 2D.</p>
+        <p>The cloud isn't uniform. The hundred trees fall into a handful of clusters — a few distinct voices, each replicated. Click a cluster to see its representative tree.</p>
+      </article>
+
+      <article class="scene" data-scene="10" data-viz="importance" data-sub="bars">
+        <h2>Which features matter most?</h2>
+        <p>Each split in each tree reduces the impurity of the data flowing through it. Sum these reductions by the splitting feature, average across trees — that's <em>Gini importance</em>.</p>
+        <p>Watch the bars stabilize as <code>B</code> grows.</p>
+      </article>
+
+      <article class="scene" data-scene="11" data-viz="importance" data-sub="waterfall">
+        <h2>Why did the forest call this penguin a Chinstrap?</h2>
+        <p>For one specific test point, decompose its predicted probability into per-feature contributions. Start from the prior at the root; add each feature's effect as we walk the tree.</p>
+        <p>The waterfall lands at the forest's final probability. The longest bar is the feature that drove the call.</p>
+      </article>
+
+      <article class="scene" data-scene="12" data-viz="importance" data-sub="heatmap">
+        <h2>Where features show up in the tree.</h2>
+        <p>Across all 100 trees, count how often each feature appears as a split at each depth. The strongest features dominate the root. Weaker ones get used deep, after the easy splits are done.</p>
+        <p>The forest's anatomy, in one matrix.</p>
+      </article>
+
+    </div>
+  </main>
+
+  <nav class="scene-nav" id="scene-nav" aria-label="Scene navigation">
+    <button data-scene-target="1">1</button><button data-scene-target="2">2</button><button data-scene-target="3">3</button><button data-scene-target="4">4</button><button data-scene-target="5">5</button><button data-scene-target="6">6</button><button data-scene-target="7">7</button><button data-scene-target="8">8</button><button data-scene-target="9">9</button><button data-scene-target="10">10</button><button data-scene-target="11">11</button><button data-scene-target="12">12</button>
+  </nav>
+
+  <!-- Vendored libs -->
+  <script src="vendor/d3.v7.min.js"></script>
+  <script src="vendor/scrollama.min.js"></script>
+  <script src="vendor/katex.min.js"></script>
+
+  <!-- Foundation -->
+  <script src="js/theme.js"></script>
+  <script src="js/rf.js"></script>
+
+  <!-- Pre-canned data (generated by precompute/build_forest.py) -->
+  <script src="data/datasets.js"></script>
+
+  <!-- Scene handlers (one file per viz type) -->
+  <script>window.SCENES = {};</script>
+  <script src="js/scenes/treeBuilder.js"></script>
+  <script src="js/scenes/marblesMtry.js"></script>
+  <script src="js/scenes/forest.js"></script>
+  <script src="js/scenes/formula.js"></script>
+  <script src="js/scenes/similarity.js"></script>
+  <script src="js/scenes/importance.js"></script>
+
+  <!-- Driver (scrollama + dispatch + keyboard nav + hash routing) -->
+  <script src="js/main.js"></script>
+</body>
+</html>

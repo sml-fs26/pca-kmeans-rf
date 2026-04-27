@@ -1,0 +1,120 @@
+/* Scene 7 — diagnostics / convergence.
+ *
+ * Three error curves (train / test / OOB) on a log-B x-axis. Color
+ * assignment is intentional: train is dim/dashed because it's context;
+ * test is the headline (var(--ink)); OOB is var(--highlight) (purple)
+ * to read as a non-class identity overlay.
+ */
+
+/* === Curves =========================================================== */
+.dx-line {
+  fill: none;
+  stroke-width: 2;
+}
+.line-train { stroke: var(--muted); stroke-dasharray: 4 3; fill: none; }
+.line-test  { stroke: var(--ink); fill: none; }
+.line-oob   { stroke: var(--highlight); fill: none; }
+
+/* OOB highlighted state: thicken when the user clicks the legend/button. */
+.line-oob.is-emphasized { stroke-width: 3.2; }
+
+/* Dots on each B sample for readability. The fill is the panel color so
+ * the dot reads as a hollow ring on the curve's stroke. */
+.curve-dot { fill: var(--panel); stroke-width: 2; }
+.curve-dot.train { stroke: var(--muted); }
+.curve-dot.test  { stroke: var(--ink); }
+.curve-dot.oob   { stroke: var(--highlight); }
+
+/* Highlighted dot at the currently selected B. */
+.curve-dot.is-selected { stroke-width: 2.6; r: 4.5; }
+
+/* === Plateau annotation =============================================== */
+.plateau-line {
+  stroke: var(--rule);
+  stroke-dasharray: 2 4;
+  shape-rendering: crispEdges;
+  fill: none;
+}
+.plateau-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* === Axes =============================================================*/
+.dx-axis path,
+.dx-axis line {
+  stroke: var(--rule);
+  shape-rendering: crispEdges;
+}
+.dx-axis text {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  fill: var(--muted);
+}
+.dx-axis-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  fill: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.dx-grid line {
+  stroke: var(--grid-line);
+  shape-rendering: crispEdges;
+}
+
+/* Title-style label above the plot. */
+.dx-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  fill: var(--ink);
+}
+
+/* === Legend (top-right inline). ====================================== */
+.dx-legend-row {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--muted);
+}
+.dx-legend-row.test  { fill: var(--ink); }
+.dx-legend-row.oob   { fill: var(--highlight); }
+
+.dx-legend-swatch { stroke-width: 2; fill: none; }
+.dx-legend-swatch.train { stroke: var(--muted); stroke-dasharray: 4 3; }
+.dx-legend-swatch.test  { stroke: var(--ink); }
+.dx-legend-swatch.oob   { stroke: var(--highlight); }
+
+/* === Hover guide ====================================================== */
+.dx-hover-guide {
+  stroke: var(--ink);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  opacity: 0.45;
+  shape-rendering: crispEdges;
+}
+.dx-hover-hit {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+/* Tooltip arrow (the "Highlight OOB" button uses this). */
+.dx-arrow {
+  stroke: var(--highlight);
+  stroke-width: 1.2;
+  fill: none;
+}
+.dx-arrow-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--highlight);
+  font-variant-numeric: tabular-nums;
+}
+
+.curve-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--muted);
+}

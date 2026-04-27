@@ -1,237 +1,52 @@
-/* Per-scene styles for forest (scenes 5, 6, 7). Owned by Agent A3. */
+/* forest scenes: gallery (4×4 small multiples) + vote (full probability surface). */
 
-/* Canvas backdrop sibling of #viz inside .viz-stage. */
-.forest-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
+/* ── Scene 5: gallery ───────────────────────────────────────────────── */
 
-/* Scatter axis labels. */
-.forest-axis-label {
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
-  font-size: 11px;
-  fill: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-/* ---- Scene 5: grove --------------------------------------------------- */
-
-.grove-readout {
-  display: flex;
-  gap: 24px;
-  align-items: baseline;
-}
-.grove-readout .grove-title {
-  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
-  font-style: italic;
-  font-size: 13px;
-  color: var(--muted);
-}
-.grove-readout .grove-stat {
-  font-family: "SF Mono", "Menlo", monospace;
-  font-variant-numeric: tabular-nums;
-  font-size: 13px;
-  color: var(--ink);
-}
-.grove-readout .grove-stat .label {
-  color: var(--muted);
-  margin-right: 4px;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-/* The 100-tile thumbnail panel sits in the SVG; we use SVG for hover frames
-   and a single canvas underneath for the bitmap thumbnails.
-   The thumbnail-frame group is interactive. */
-.grove-frame {
-  fill: transparent;
+svg .gallery-cell .gallery-cell-border {
+  fill: var(--panel);
   stroke: var(--rule);
-  stroke-width: 0.6;
-  cursor: pointer;
-  transition: stroke var(--t-fast), stroke-width var(--t-fast);
-}
-.grove-frame:hover { stroke: var(--ink); stroke-width: 1.4; }
-.grove-frame.active { stroke: var(--ink); stroke-width: 1.5; }
-
-.grove-shadow {
-  fill: rgba(0,0,0,0.10);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity var(--t-fast);
-}
-.grove-shadow.active { opacity: 1; }
-
-/* ---- Scene 6: bSlider ------------------------------------------------- */
-
-.b-slider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--panel);
-  border: 1px solid var(--rule);
-  border-radius: 6px;
-  padding: 12px 14px;
-}
-.b-slider label {
-  font-family: "SF Mono", "Menlo", monospace;
-  font-size: 12px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-}
-.b-slider input[type=range] {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 22px;
-  accent-color: var(--ink);
-  cursor: pointer;
-}
-.b-slider .b-value {
-  font-family: "SF Mono", "Menlo", monospace;
-  font-variant-numeric: tabular-nums;
-  font-size: 13px;
-  color: var(--ink);
-  white-space: nowrap;
-  min-width: 8ch;
-  text-align: right;
-}
-
-/* ---- Scene 7: voting -------------------------------------------------- */
-
-.query-point {
-  fill: var(--ink);
-  stroke: var(--bg);
-  stroke-width: 2.5;
-  cursor: grab;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
-}
-.query-point.dragging { cursor: grabbing; }
-.query-point-inner {
-  fill: var(--bg);
-  pointer-events: none;
-}
-.query-halo {
-  fill: none;
-  stroke: var(--ink);
   stroke-width: 1;
-  stroke-opacity: 0.25;
-  pointer-events: none;
+  shape-rendering: crispEdges;
 }
 
-.urns {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  width: 100%;
+svg .gallery-cell.hover .gallery-cell-border {
+  stroke: var(--highlight);
+  stroke-width: 1.5;
 }
 
-.urn {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px 12px;
-  background: var(--panel);
-  border: 1px solid var(--rule);
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
-}
-.urn.winner {
-  border-color: var(--ink);
+svg .gallery-cell .gallery-cell-hit {
+  fill: transparent;
+  stroke: none;
+  pointer-events: all;
+  cursor: crosshair;
 }
 
-.urn .urn-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
+svg .gallery-cell .point {
+  stroke: var(--panel);
+  stroke-width: 0.4;
 }
-.urn .species {
-  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
-  font-size: 14px;
-  font-weight: 500;
-}
-.urn .count {
+
+svg .tree-label {
   font-family: "SF Mono", "Menlo", monospace;
-  font-variant-numeric: tabular-nums;
-  font-size: 16px;
-  font-weight: 500;
-}
-.urn .bar-track {
-  position: relative;
-  height: 8px;
-  background: var(--rule);
-  border-radius: 99px;
-  overflow: hidden;
-}
-.urn .bar-fill {
-  position: absolute;
-  inset: 0;
-  width: 0%;
-  border-radius: 99px;
-  transition: width var(--t-fast);
-}
-.urn .bar-fill.cluster-1 { background: var(--c1); }
-.urn .bar-fill.cluster-2 { background: var(--c2); }
-.urn .bar-fill.cluster-3 { background: var(--c3); }
-.urn .pct {
-  font-family: "SF Mono", "Menlo", monospace;
-  font-variant-numeric: tabular-nums;
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.predicted-banner {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 8px 12px;
-  margin-bottom: 10px;
-  background: var(--panel);
-  border: 1px solid var(--rule);
-  border-radius: 4px;
-  font-size: 13px;
-}
-.predicted-banner .label {
-  color: var(--muted);
   font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.predicted-banner .name {
-  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
-  font-size: 18px;
-  font-weight: 500;
-}
-.predicted-banner .prob {
-  font-family: "SF Mono", "Menlo", monospace;
-  font-variant-numeric: tabular-nums;
-  margin-left: auto;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.predicted-banner .name.cluster-1 { color: var(--c1); }
-.predicted-banner .name.cluster-2 { color: var(--c2); }
-.predicted-banner .name.cluster-3 { color: var(--c3); }
-
-/* Marble particles (votes flying into urns). */
-.marble {
+  fill: var(--muted);
   pointer-events: none;
+  user-select: none;
 }
-.marble.cluster-1 { fill: var(--c1); }
-.marble.cluster-2 { fill: var(--c2); }
-.marble.cluster-3 { fill: var(--c3); }
 
-/* Reset .viz-readout default grid for our flex layouts. */
-.viz-readout.forest-readout-flex {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* Slightly reduce region tint inside small multiples so points stay legible. */
+svg .gallery-cell .region-cell {
+  fill-opacity: 0.18;
+  shape-rendering: crispEdges;
+}
+
+/* ── Scene 6: vote ──────────────────────────────────────────────────── */
+
+svg .forest-prob .prob-cell {
+  shape-rendering: crispEdges;
+}
+
+svg .forest-points .point {
+  stroke: var(--bg);
+  stroke-width: 0.8;
 }

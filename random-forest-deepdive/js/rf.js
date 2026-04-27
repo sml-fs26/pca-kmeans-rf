@@ -1,122 +1,199 @@
-// Shared random-forest math + traversal utilities. No DOM. No d3.
-// Scenes lift this for any prediction or formula evaluation they need.
+// Shared math/geometry utilities for the random-forest viz.
+// Tree node format (from precompute):
+//   leaf:     { leaf: true,  value: 0|1, prob1: number, samples: int, depth: int }
+//   internal: { leaf: false, feature: 0|1, threshold: number, left: node, right: node, samples: int, depth: int }
 
 window.RF = (function () {
 
-  // ---- Tree traversal ------------------------------------------------------
-
-  // Walk a serialized sklearn tree (DATA.forest2D.trees[i]) for a feature vector.
-  // `point` is an array of feature values, length = number of features the tree was trained on.
-  // For 2D trees: point = [bill_length, flipper_length].
-  function predictPath(tree, point) {
-    const path = [];
-    let nodeId = 0;
-    while (true) {
-      const node = tree.nodes[nodeId];
-      path.push(nodeId);
-      if (node.isLeaf) return path;
-      nodeId = (point[node.feature] <= node.threshold) ? node.left : node.right;
+  // Predict the class for a single point by walking the tree.
+  // If maxDepth is finite, stop at that depth and return the majority class
+  // implied by the node's prob1 (>0.5 → 1, else 0).
+  function walkTree(tree, x, y, maxDepth) {
+    let node = tree;
+    let d = 0;
+    while (!node.leaf && d < (maxDepth ?? Infinity)) {
+      const v = node.feature === 0 ? x : y;
+      node = v <= node.threshold ? node.left : node.right;
+      d++;
     }
+    return node.leaf ? node.value : (node.prob1 >= 0.5 ? 1 : 0);
   }
 
-  function predictLeaf(tree, point) {
-    let nodeId = 0;
-    while (true) {
-      const node = tree.nodes[nodeId];
-      if (node.isLeaf) return node;
-      nodeId = (point[node.feature] <= node.threshold) ? node.left : node.right;
+  // Soft probability — fraction of class-1 at the (possibly truncated) node.
+  function walkTreeProb(tree, x, y, maxDepth) {
+    let node = tree;
+    let d = 0;
+    while (!node.leaf && d < (maxDepth ?? Infinity)) {
+      const v = node.feature === 0 ? x : y;
+      node = v <= node.threshold ? node.left : node.right;
+      d++;
     }
+    return node.prob1;
   }
 
-  function predictClass(tree, point) {
-    return predictLeaf(tree, point).majorityClass;
+  // Predict over a 2D grid of points. Returns a flat Float32Array of size nx*ny
+  // (row-major, y outer, x inner). Values are 0/1 (use computeTreeBoundary)
+  // or floats in [0,1] (use computeTreeProb).
+  function gridXY(grid) {
+    const xs = new Float32Array(grid.nx);
+    const ys = new Float32Array(grid.ny);
+    for (let i = 0; i < grid.nx; i++) xs[i] = grid.xMin + i * (grid.xMax - grid.xMin) / (grid.nx - 1);
+    for (let j = 0; j < grid.ny; j++) ys[j] = grid.yMin + j * (grid.yMax - grid.yMin) / (grid.ny - 1);
+    return { xs, ys };
   }
 
-  function leafProbability(tree, point) {
-    const leaf = predictLeaf(tree, point);
-    const total = leaf.classDistribution.reduce((a, b) => a + b, 0);
-    return leaf.classDistribution.map(c => c / total);
-  }
-
-  // ---- Forest aggregation --------------------------------------------------
-
-  // Hard votes: returns { counts: [c0, c1, c2], winner: argmax }
-  function forestVotes(trees, point, nClasses) {
-    const counts = new Array(nClasses).fill(0);
-    for (const tree of trees) {
-      counts[predictClass(tree, point)]++;
+  function computeTreeBoundary(tree, grid, maxDepth) {
+    const { xs, ys } = gridXY(grid);
+    const out = new Uint8Array(grid.nx * grid.ny);
+    for (let j = 0; j < grid.ny; j++) {
+      for (let i = 0; i < grid.nx; i++) {
+        out[j * grid.nx + i] = walkTree(tree, xs[i], ys[j], maxDepth);
+      }
     }
-    let winner = 0;
-    for (let i = 1; i < counts.length; i++) if (counts[i] > counts[winner]) winner = i;
-    return { counts, winner };
-  }
-
-  // Soft probabilities (sklearn's `predict_proba` semantics): mean of per-tree leaf class probabilities.
-  function forestProb(trees, point, nClasses) {
-    const probs = new Array(nClasses).fill(0);
-    for (const tree of trees) {
-      const p = leafProbability(tree, point);
-      for (let i = 0; i < nClasses; i++) probs[i] += p[i];
-    }
-    for (let i = 0; i < nClasses; i++) probs[i] /= trees.length;
-    return probs;
-  }
-
-  // ---- Variance formula (scene 8) -----------------------------------------
-
-  function varianceAtB(rho, sigma2, B) {
-    return rho * sigma2 + (1 - rho) * sigma2 / B;
-  }
-
-  function varianceCurve(rho, sigma2, BMax) {
-    const out = new Array(BMax);
-    for (let B = 1; B <= BMax; B++) out[B - 1] = { B, v: varianceAtB(rho, sigma2, B) };
     return out;
   }
 
-  // ---- Decision boundary grid helpers --------------------------------------
-
-  // Map a flat int8 grid (length w*h) to {x, y, classIdx} cells in plot coords.
-  // Useful for d3.contours or canvas raster drawing.
-  function gridCellAt(arr, gridW, i, j) {
-    return arr[j * gridW + i];
+  function computeTreeProb(tree, grid, maxDepth) {
+    const { xs, ys } = gridXY(grid);
+    const out = new Float32Array(grid.nx * grid.ny);
+    for (let j = 0; j < grid.ny; j++) {
+      for (let i = 0; i < grid.nx; i++) {
+        out[j * grid.nx + i] = walkTreeProb(tree, xs[i], ys[j], maxDepth);
+      }
+    }
+    return out;
   }
 
-  // Convert plot coords to grid index using DATA.scatter extents.
-  function plotToGrid(x, y, scatter, gridW, gridH) {
-    const i = Math.max(0, Math.min(gridW - 1, Math.floor((x - scatter.xMin) / (scatter.xMax - scatter.xMin) * gridW)));
-    const j = Math.max(0, Math.min(gridH - 1, Math.floor((y - scatter.yMin) / (scatter.yMax - scatter.yMin) * gridH)));
-    return { i, j };
+  // Convert a nested 2D array (b[j][i] — j is y-index from yMin upward, i is x-index)
+  // into the flat (j*nx+i) layout that renderGridCells / renderProbCells expect.
+  function flatten2D(nested) {
+    const ny = nested.length, nx = nested[0].length;
+    const out = new Float32Array(nx * ny);
+    for (let j = 0; j < ny; j++) {
+      const row = nested[j];
+      for (let i = 0; i < nx; i++) out[j * nx + i] = row[i];
+    }
+    return out;
   }
 
-  // ---- Color helpers -------------------------------------------------------
-
-  // Use these CSS classes — never inline hex — so dark mode swaps automatically.
-  // 1-indexed to match the .cluster-N convention in style.css.
-  function classToken(classIdx) { return `cluster-${classIdx + 1}`; }
-
-  // Read the current resolved hex for a class, when an SVG element absolutely needs it
-  // (e.g. for a canvas draw). The Theme module exposes readVar().
-  function classColor(classIdx) {
-    return Theme.readVar(`--c${classIdx + 1}`);
+  // Average a set of {0,1} prediction grids into a [0,1] probability grid.
+  function averageGrids(grids) {
+    if (!grids.length) return null;
+    const n = grids[0].length;
+    const out = new Float32Array(n);
+    for (let g = 0; g < grids.length; g++) {
+      const arr = grids[g];
+      for (let i = 0; i < n; i++) out[i] += arr[i];
+    }
+    for (let i = 0; i < n; i++) out[i] /= grids.length;
+    return out;
   }
 
-  // ---- Lower-triangular access for the similarity matrix ------------------
+  // Extract axis-aligned split lines from a tree truncated at maxDepth.
+  // Each split is { feature: 0|1, threshold: number, x0, x1, y0, y1 }
+  // where (x0,x1,y0,y1) is the bounding rectangle in feature space at the
+  // moment of the split (so the split line is clipped to the parent region).
+  function extractSplits(tree, maxDepth, bbox) {
+    const out = [];
+    const md = maxDepth ?? Infinity;
+    function walk(node, x0, x1, y0, y1, depth) {
+      if (node.leaf || depth >= md) return;
+      const t = node.threshold;
+      if (node.feature === 0) {
+        out.push({ feature: 0, threshold: t, x0: t, x1: t, y0, y1, depth });
+        walk(node.left,  x0, t,  y0, y1, depth + 1);
+        walk(node.right, t,  x1, y0, y1, depth + 1);
+      } else {
+        out.push({ feature: 1, threshold: t, x0, x1, y0: t, y1: t, depth });
+        walk(node.left,  x0, x1, y0, t,  depth + 1);
+        walk(node.right, x0, x1, t,  y1, depth + 1);
+      }
+    }
+    walk(tree, bbox.x0, bbox.x1, bbox.y0, bbox.y1, 0);
+    return out;
+  }
 
-  // distLowerTri stores entries (i, j) with i > j in row-major order:
-  //   index(i, j) = i*(i-1)/2 + j   for i > j
-  function similarityAt(distLowerTri, i, j) {
-    if (i === j) return 0;
-    if (i < j) [i, j] = [j, i];
-    return distLowerTri[i * (i - 1) / 2 + j];
+  // Count nodes / leaves in a tree truncated at maxDepth.
+  function treeStats(tree, maxDepth) {
+    const md = maxDepth ?? Infinity;
+    let nodes = 0, leaves = 0, depthMax = 0;
+    function walk(node, d) {
+      nodes++;
+      depthMax = Math.max(depthMax, d);
+      if (node.leaf || d >= md) { leaves++; return; }
+      walk(node.left, d + 1);
+      walk(node.right, d + 1);
+    }
+    walk(tree, 0);
+    return { nodes, leaves, depthMax };
+  }
+
+  // Render a Uint8Array prediction grid as <rect> cells, colored by class.
+  // Caller owns the parent <g>; we manage children via D3 join.
+  // pixelSize: width/height of each cell in screen pixels.
+  function renderGridCells(parentG, gridArr, grid, scaleX, scaleY) {
+    const cells = [];
+    const px = (scaleX(grid.xMax) - scaleX(grid.xMin)) / (grid.nx - 1);
+    const py = (scaleY(grid.yMin) - scaleY(grid.yMax)) / (grid.ny - 1);
+    for (let j = 0; j < grid.ny; j++) {
+      for (let i = 0; i < grid.nx; i++) {
+        cells.push({ i, j, v: gridArr[j * grid.nx + i] });
+      }
+    }
+    const { xs, ys } = gridXY(grid);
+    const sel = parentG.selectAll('rect.region-cell').data(cells);
+    sel.enter().append('rect')
+      .attr('class', 'region-cell')
+      .merge(sel)
+      .attr('x', d => scaleX(xs[d.i]) - px / 2)
+      .attr('y', d => scaleY(ys[d.j]) - py / 2)
+      .attr('width', px + 0.5)
+      .attr('height', py + 0.5)
+      .attr('class', d => 'region-cell ' + (d.v >= 0.5 ? 'region-2' : 'region-1'));
+    sel.exit().remove();
+  }
+
+  // Render a soft probability grid as <rect> cells with fill-opacity by distance from 0.5.
+  // The fill class flips when prob crosses 0.5.
+  function renderProbCells(parentG, probArr, grid, scaleX, scaleY) {
+    const cells = [];
+    const px = (scaleX(grid.xMax) - scaleX(grid.xMin)) / (grid.nx - 1);
+    const py = (scaleY(grid.yMin) - scaleY(grid.yMax)) / (grid.ny - 1);
+    for (let j = 0; j < grid.ny; j++) {
+      for (let i = 0; i < grid.nx; i++) {
+        cells.push({ i, j, p: probArr[j * grid.nx + i] });
+      }
+    }
+    const { xs, ys } = gridXY(grid);
+    const sel = parentG.selectAll('rect.prob-cell').data(cells);
+    sel.enter().append('rect')
+      .attr('class', 'prob-cell')
+      .merge(sel)
+      .attr('x', d => scaleX(xs[d.i]) - px / 2)
+      .attr('y', d => scaleY(ys[d.j]) - py / 2)
+      .attr('width', px + 0.5)
+      .attr('height', py + 0.5)
+      .attr('class', d => 'prob-cell ' + (d.p >= 0.5 ? 'region-2' : 'region-1'))
+      .attr('fill-opacity', d => Math.abs(d.p - 0.5) * 0.5 + 0.05);
+    sel.exit().remove();
+  }
+
+  // Standard linear scales for the moons coordinate frame, given a viewport rect.
+  function makeScales(grid, width, height, padX, padY) {
+    padX = padX ?? 16;
+    padY = padY ?? 16;
+    return {
+      x: d3.scaleLinear().domain([grid.xMin, grid.xMax]).range([padX, width - padX]),
+      y: d3.scaleLinear().domain([grid.yMin, grid.yMax]).range([height - padY, padY]),
+    };
   }
 
   return {
-    predictPath, predictLeaf, predictClass, leafProbability,
-    forestVotes, forestProb,
-    varianceAtB, varianceCurve,
-    gridCellAt, plotToGrid,
-    classToken, classColor,
-    similarityAt,
+    walkTree, walkTreeProb,
+    computeTreeBoundary, computeTreeProb,
+    averageGrids, flatten2D,
+    extractSplits, treeStats,
+    renderGridCells, renderProbCells,
+    makeScales, gridXY,
   };
 })();

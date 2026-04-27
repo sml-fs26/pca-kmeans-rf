@@ -6,12 +6,12 @@
   <title>The forest grows. — Random Forests · SML</title>
   <link rel="stylesheet" href="vendor/katex.min.css">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/treeBuilder.css">
-  <link rel="stylesheet" href="css/marblesMtry.css">
+  <link rel="stylesheet" href="css/moons.css">
+  <link rel="stylesheet" href="css/variance.css">
+  <link rel="stylesheet" href="css/bootstrap.css">
   <link rel="stylesheet" href="css/forest.css">
-  <link rel="stylesheet" href="css/formula.css">
-  <link rel="stylesheet" href="css/similarity.css">
-  <link rel="stylesheet" href="css/importance.css">
+  <link rel="stylesheet" href="css/diagnostics.css">
+  <link rel="stylesheet" href="css/showdown.css">
 </head>
 <body>
 
@@ -21,12 +21,11 @@
 
   <header class="hero">
     <h1>The forest grows.</h1>
-    <p class="subtitle">How averaging dumb trees beats one smart one — an illustrated tour of random forests, on Palmer penguins.</p>
+    <p class="subtitle">Trees can't draw spirals. A hundred of them, averaged, can.</p>
     <p class="hint">Scroll, or press <kbd>→</kbd> · <kbd>t</kbd> for theme</p>
   </header>
 
   <main class="scrolly">
-    <!-- STICKY VIZ COLUMN -->
     <div class="viz-column">
       <div class="viz-stage">
         <svg id="viz" aria-label="Random forest visualization"></svg>
@@ -36,87 +35,62 @@
       <div id="viz-readout" class="viz-readout"></div>
     </div>
 
-    <!-- PROSE COLUMN -->
     <div class="prose-column">
 
-      <article class="scene" data-scene="1" data-viz="treeBuilder" data-sub="singleOverfit">
-        <h2>One tree is a brittle expert.</h2>
-        <p>A decision tree splits the plane with axis-aligned cuts until every training point sits in its own pure region. Watch one grow.</p>
-        <p>It's never wrong on training data. That's the problem — the slivers chasing single points won't survive on data the tree hasn't seen.</p>
+      <article class="scene" data-scene="1" data-viz="moons" data-sub="hook">
+        <h2>Two spirals.</h2>
+        <p>Two hundred points. A blue arm and a red arm, twisting around each other for two and a half turns. The class boundary is the most non-axis-aligned shape we can draw on a plane.</p>
+        <p>Where would you cut?</p>
       </article>
 
-      <article class="scene" data-scene="2" data-viz="treeBuilder" data-sub="fiveBootstraps">
-        <h2>A second tree disagrees.</h2>
-        <p>Resample the training rows with replacement. Regrow the tree. The boundary moves — sometimes a lot. Repeat five times.</p>
-        <p>The shared signal emerges where the trees agree. The disagreement concentrates near the true class boundary. That disagreement is information.</p>
+      <article class="scene" data-scene="2" data-viz="moons" data-sub="depth">
+        <h2>A tree can only cut one way.</h2>
+        <p>Decision trees split with axis-aligned cuts — vertical or horizontal lines, never diagonal. To approximate a spiral they have to step.</p>
+        <p>Drag the depth slider. Below depth 5 the tree is hopelessly underfit; the boundary looks nothing like a spiral. Past depth 8 it fragments into tiny noise pockets, memorizing individual training points. Train accuracy climbs to 100%; test accuracy plateaus near 74%.</p>
+        <p>The gap between the two — over twenty percentage points wide — is what overfitting looks like.</p>
       </article>
 
-      <article class="scene" data-scene="3" data-viz="marblesMtry" data-sub="bootstrap">
-        <h2>Where the diversity comes from. Part 1: the bootstrap.</h2>
-        <p>Each tree trains on its own resample of the data — N rows drawn with replacement from the original N. Some rows show up twice or three times. About 37% don't show up at all.</p>
-        <p>Those rows are <em>out of bag</em>. They've never been seen by this tree, so its prediction on them is honest — held-out validation, for free, with no separate test set.</p>
+      <article class="scene" data-scene="3" data-viz="variance" data-sub="perturb">
+        <h2>The same data, jittered, gives a different tree.</h2>
+        <p>Resample the spirals with a fresh seed. Fit a fresh tree. The boundary doesn't shift politely — it <em>flips</em>, often committing to a different arm at the very first split.</p>
+        <p>Across the five reseeds, more than 45% of the plane gets a different prediction depending on which one you pick. A tree is a high-variance estimator. We want its prediction without its volatility.</p>
       </article>
 
-      <article class="scene" data-scene="4" data-viz="marblesMtry" data-sub="mtry">
-        <h2>Part 2: feature randomness.</h2>
-        <p>At every split, the tree only gets to look at a random subset of <code>mtry</code> features. Without this restriction, every tree would always pick the strongest feature first — and they'd all look alike.</p>
-        <p>Drag <code>mtry</code> below to watch the tree shape change.</p>
+      <article class="scene" data-scene="4" data-viz="bootstrap" data-sub="sample">
+        <h2>Sample with replacement.</h2>
+        <p>Draw 200 points from the 200-point training set, with replacement. About 63% of the originals show up at least once — some twice, some three times. The remaining 37% don't show up at all.</p>
+        <p>Those leftover points are <em>out of bag</em>. They've never been seen by this tree, so we can score the tree on them honestly. Every tree comes with its own free held-out validation set.</p>
       </article>
 
-      <article class="scene" data-scene="5" data-viz="forest" data-sub="grove">
-        <h2>The grove.</h2>
-        <p>One hundred trees, each grown from its own bootstrap, each given a random subset of features at every split. Hover any tree to see its decision boundary alone.</p>
-        <p>No two are quite the same. They're a parliament of weak voters.</p>
+      <article class="scene" data-scene="5" data-viz="forest" data-sub="gallery">
+        <h2>Sixteen trees, sixteen staircases.</h2>
+        <p>Each tree is grown on its own bootstrap of the data. None of them looks like a spiral — they all look like staircases, but with different arms confidently extended in different directions.</p>
+        <p>None of these trees is the answer. But every one is a <em>vote</em>.</p>
       </article>
 
-      <article class="scene" data-scene="6" data-viz="forest" data-sub="bSlider">
-        <h2>More trees, less variance.</h2>
-        <p>Drag <code>B</code> from 1 to 100. Watch test accuracy climb as the predictions of new trees average in. Training accuracy never moves — it's pinned at 1.0 because the trees are deep enough to memorize.</p>
-        <p>After about 30 trees the curve plateaus. Adding more trees can't push past the floor set by tree correlation.</p>
+      <article class="scene" data-scene="6" data-viz="forest" data-sub="vote">
+        <h2>Average the votes.</h2>
+        <p>Take a query point. Run it through all 200 trees. Count the votes for class 1. The fraction is a probability — and across the plane, that fraction traces a soft spiral that no single tree could draw.</p>
+        <p>The staircases cancel. The spiral emerges.</p>
       </article>
 
-      <article class="scene" data-scene="7" data-viz="forest" data-sub="voting">
-        <h2>How a single prediction is made.</h2>
-        <p>A new query point falls onto the plane. Each of the 100 trees follows its own root-to-leaf path and casts a vote. The forest predicts the majority class; the probability is the vote share.</p>
-        <p>Drag the point. Near a class boundary the votes split — that's how you read uncertainty out of a forest.</p>
+      <article class="scene" data-scene="7" data-viz="diagnostics" data-sub="convergence">
+        <h2>How many trees is enough?</h2>
+        <p>Add trees one at a time and watch test error fall from above 30% down to about 18%. After thirty trees the curve plateaus — adding more is cheap insurance, not a real gain.</p>
+        <p>The purple line is <em>out-of-bag error</em>, computed from each tree's own untouched 37%. It runs higher than test here — at this small training size, generalizing back onto the training points is genuinely harder than predicting fresh draws — but it converges in lockstep, and it costs nothing.</p>
       </article>
 
-      <article class="scene" data-scene="8" data-viz="formula" data-sub="variance">
-        <h2>The math behind &ldquo;more trees, less variance.&rdquo;</h2>
-        <p>The variance of an averaged prediction over <code>B</code> trees with single-tree variance σ² and pairwise correlation ρ is</p>
-        <div class="math-inline" id="prose-formula"></div>
-        <p>Drag <code>B</code> and <code>ρ</code>. As <code>B → ∞</code> only the term proportional to ρ survives — that's the floor. Lower <code>mtry</code> drops ρ and lowers the floor, but the trees themselves get weaker. The forest lives in this tradeoff.</p>
-      </article>
-
-      <article class="scene" data-scene="9" data-viz="similarity" data-sub="mds">
-        <h2>How many distinct voices live in 100 trees?</h2>
-        <p>For any two trees, count the fraction of training rows they route to the same leaf-equivalence class. Use that as a similarity. Embed all 100 trees in 2D.</p>
-        <p>The cloud isn't uniform. The hundred trees fall into a handful of clusters — a few distinct voices, each replicated. Click a cluster to see its representative tree.</p>
-      </article>
-
-      <article class="scene" data-scene="10" data-viz="importance" data-sub="bars">
-        <h2>Which features matter most?</h2>
-        <p>Each split in each tree reduces the impurity of the data flowing through it. Sum these reductions by the splitting feature, average across trees — that's <em>Gini importance</em>.</p>
-        <p>Watch the bars stabilize as <code>B</code> grows.</p>
-      </article>
-
-      <article class="scene" data-scene="11" data-viz="importance" data-sub="waterfall">
-        <h2>Why did the forest call this penguin a Chinstrap?</h2>
-        <p>For one specific test point, decompose its predicted probability into per-feature contributions. Start from the prior at the root; add each feature's effect as we walk the tree.</p>
-        <p>The waterfall lands at the forest's final probability. The longest bar is the feature that drove the call.</p>
-      </article>
-
-      <article class="scene" data-scene="12" data-viz="importance" data-sub="heatmap">
-        <h2>Where features show up in the tree.</h2>
-        <p>Across all 100 trees, count how often each feature appears as a split at each depth. The strongest features dominate the root. Weaker ones get used deep, after the easy splits are done.</p>
-        <p>The forest's anatomy, in one matrix.</p>
+      <article class="scene" data-scene="8" data-viz="showdown" data-sub="reseeds">
+        <h2>Fifty trials. One tree vs. one forest.</h2>
+        <p>For fifty different random seeds, fit a deep tree and a 200-tree forest on a fresh spiral. Plot the test errors. The single tree is everywhere — its column smears across more than ten percentage points of error. The forest stays in a tight band less than half as wide.</p>
+        <p>The forest isn't perfect: spirals are intrinsically hard for axis-aligned splitters. But it's <em>stable</em>, and it's better on average. That's the trade.</p>
       </article>
 
     </div>
   </main>
 
   <nav class="scene-nav" id="scene-nav" aria-label="Scene navigation">
-    <button data-scene-target="1">1</button><button data-scene-target="2">2</button><button data-scene-target="3">3</button><button data-scene-target="4">4</button><button data-scene-target="5">5</button><button data-scene-target="6">6</button><button data-scene-target="7">7</button><button data-scene-target="8">8</button><button data-scene-target="9">9</button><button data-scene-target="10">10</button><button data-scene-target="11">11</button><button data-scene-target="12">12</button>
+    <button data-scene-target="1">1</button><button data-scene-target="2">2</button><button data-scene-target="3">3</button><button data-scene-target="4">4</button><button data-scene-target="5">5</button><button data-scene-target="6">6</button><button data-scene-target="7">7</button><button data-scene-target="8">8</button>
   </nav>
 
   <!-- Vendored libs -->
@@ -128,17 +102,17 @@
   <script src="js/theme.js"></script>
   <script src="js/rf.js"></script>
 
-  <!-- Pre-canned data (generated by precompute/build_forest.py) -->
+  <!-- Pre-canned data (generated by precompute/build_data.py) -->
   <script src="data/datasets.js"></script>
 
-  <!-- Scene handlers (one file per viz type) -->
+  <!-- Scene handlers (one file per viz kind) -->
   <script>window.SCENES = {};</script>
-  <script src="js/scenes/treeBuilder.js"></script>
-  <script src="js/scenes/marblesMtry.js"></script>
+  <script src="js/scenes/moons.js"></script>
+  <script src="js/scenes/variance.js"></script>
+  <script src="js/scenes/bootstrap.js"></script>
   <script src="js/scenes/forest.js"></script>
-  <script src="js/scenes/formula.js"></script>
-  <script src="js/scenes/similarity.js"></script>
-  <script src="js/scenes/importance.js"></script>
+  <script src="js/scenes/diagnostics.js"></script>
+  <script src="js/scenes/showdown.js"></script>
 
   <!-- Driver (scrollama + dispatch + keyboard nav + hash routing) -->
   <script src="js/main.js"></script>

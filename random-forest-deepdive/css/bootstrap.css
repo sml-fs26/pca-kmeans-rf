@@ -1,0 +1,17 @@
+/* Scene 4 — bootstrap visualization. */
+
+svg .oob-point {
+  fill-opacity: 0.35;
+}
+
+svg .oob-ring {
+  stroke: var(--highlight);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 2;
+}
+
+svg .bag-halo {
+  stroke: var(--ink);
+  stroke-opacity: 0.45;
+  stroke-width: 1;
+}

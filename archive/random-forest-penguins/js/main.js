@@ -25,6 +25,7 @@
     const vizKind = el.dataset.viz;
     const sub = el.dataset.sub || null;
 
+    // Let outgoing viz clean up if it's switching to a different viz kind.
     if (lastVizKind && lastVizKind !== vizKind) {
       const outgoing = window.SCENES[lastVizKind];
       if (outgoing && outgoing.exit) outgoing.exit(ctx);
@@ -73,18 +74,21 @@
     else if (e.key === 'End') { scrollToScene(sceneEls.length - 1); e.preventDefault(); }
   });
 
-  // Number-key jumps: 1..8.
+  // Number-key jumps: 1..9 + 0 (= 10), q (= 11), w (= 12). Scaling beyond 12 needs more keys.
   document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    if (/^[1-8]$/.test(e.key)) { scrollToScene(+e.key - 1); e.preventDefault(); }
+    if (/^[1-9]$/.test(e.key)) { scrollToScene(+e.key - 1); e.preventDefault(); }
+    else if (e.key === '0') { scrollToScene(9); e.preventDefault(); }
+    else if (e.key === 'q' || e.key === 'Q') { scrollToScene(10); e.preventDefault(); }
+    else if (e.key === 'w' || e.key === 'W') { scrollToScene(11); e.preventDefault(); }
   });
 
   document.querySelectorAll('.scene-nav button').forEach(b => {
     b.addEventListener('click', () => scrollToScene(+b.dataset.sceneTarget - 1));
   });
 
-  // Hash routing on load (#scene-N) — instant scroll, not smooth, so headless
-  // screenshots and refresh-on-scene land on the right frame immediately.
+  // Hash routing on load (#scene-N) — use instant scroll, not smooth, so that
+  // headless screenshots (and refresh-on-scene) land on the right frame immediately.
   if (location.hash) {
     const m = location.hash.match(/^#scene-(\d+)/);
     if (m) {
@@ -94,5 +98,6 @@
     }
   }
 
+  // Render the first scene immediately so the viz panel isn't blank before scroll.
   if (activeIdx === -1) dispatch(0);
 })();

@@ -1,0 +1,97 @@
+/* Scene 8 — showdown / reseeds.
+ *
+ * Top half: side-by-side decision boundaries (single tree vs. RF).
+ * Bottom half: strip plot — 50 single-tree errors (left col, muted)
+ * vs. 50 RF errors (right col, ink). Tight band vs. wide cloud is
+ * the entire point. Mean ticks on each column; dashed connector
+ * between them shows the gap.
+ */
+
+/* === Mini-frame around each boundary panel ============================ */
+.mini-frame {
+  fill: none;
+  stroke: var(--rule);
+  shape-rendering: crispEdges;
+}
+.mini-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Scatter points overlaid on the boundary panels. They use the project's
+ * existing .point + .cluster-N classes from style.css; nothing new here. */
+
+/* === Strip plot dots ================================================== */
+.dot-single { fill: var(--muted); fill-opacity: 0.7; }
+.dot-rf     { fill: var(--ink);   fill-opacity: 0.85; }
+
+/* Sigma bands behind each column. */
+.sigma-band.single { fill: var(--muted);     fill-opacity: 0.10; }
+.sigma-band.rf     { fill: var(--ink);       fill-opacity: 0.07; }
+
+/* Mean tick marks. */
+.mean-line        { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 0; }
+.mean-line.single { stroke: var(--muted); stroke-dasharray: 4 3; stroke-width: 2; }
+
+/* Dashed connector showing the mean gap. */
+.mean-connector {
+  stroke: var(--rule);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  shape-rendering: crispEdges;
+}
+.mean-gap-label {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* === Group headers above each column =================================== */
+.col-header {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 11px;
+  fill: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.col-subtitle {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* === Axes ============================================================= */
+.sd-axis path,
+.sd-axis line {
+  stroke: var(--rule);
+  shape-rendering: crispEdges;
+}
+.sd-axis text {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 10px;
+  fill: var(--muted);
+}
+.sd-axis-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size: 11px;
+  fill: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.sd-grid line {
+  stroke: var(--grid-line);
+  shape-rendering: crispEdges;
+}
+
+/* Section title above the strip plot. */
+.sd-title {
+  font-family: "Iowan Old Style", "Palatino", Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  fill: var(--ink);
+}

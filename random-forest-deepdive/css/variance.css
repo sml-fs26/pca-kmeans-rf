@@ -1,0 +1,27 @@
+/* Scene 3 — variance / perturbation. */
+
+.perturb-pager {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.perturb-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background var(--t-fast), border-color var(--t-fast);
+}
+
+.perturb-dot:hover { border-color: var(--ink); }
+.perturb-dot.active {
+  background: var(--ink);
+  border-color: var(--ink);
+}
