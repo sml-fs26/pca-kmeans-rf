@@ -40,69 +40,65 @@
         <p>It looks like static. There's structure in there — but you can't see it.</p>
       </article>
 
-      <article class="scene" data-scene="3" data-viz="single-bill">
-        <h2>One bill at a time.</h2>
-        <p>Pull out a single column. Each senator either voted yea or nay (or didn't vote).</p>
-        <p>That single bill places each senator on a number line: <code>+1</code>, <code>0</code>, or <code>−1</code>. The 119th Senate took <em>679 such votes</em>. So every senator lives in 679-dimensional space.</p>
+      <article class="scene" data-scene="3" data-viz="single-senator">
+        <h2>One senator at a time.</h2>
+        <p>Pull out a single row. That's one senator's voting record — every yea, every nay, every absence — across all 679 roll calls of the Congress.</p>
+        <p>Each cell is a coordinate. <span class="vote-yea">Red</span> is <code>+1</code>, <span class="vote-nay">blue</span> is <code>−1</code>, white is <code>0</code>. Stacked into a single vector, that row places this one senator at a single point in <em>679-dimensional space</em>.</p>
+        <p>Every senator is one such point. PCA will look for the directions that best spread those 100 points apart.</p>
       </article>
 
-      <article class="scene" data-scene="4" data-viz="two-bills">
-        <h2>Two bills, two axes.</h2>
-        <p>Plot every senator using two votes as coordinates. Now we can see <em>some</em> structure — but we've thrown away 677 dimensions to get here.</p>
-        <p>What if we picked the two axes that revealed the <em>most</em> structure?</p>
-      </article>
-
-      <article class="scene" data-scene="5" data-viz="math">
+      <article class="scene" data-scene="4" data-viz="math">
         <h2>That's what PCA does.</h2>
         <p>Form the covariance matrix of the data. Find the directions of largest variance — its top eigenvectors.</p>
         <div class="math-block" id="math-block"></div>
-        <p>Project the original 600-dimensional points onto the first two of those directions. That's our new coordinate system: <strong>PC1</strong> and <strong>PC2</strong>.</p>
+        <p>Project the 679-dimensional points onto the first two of those directions. That's our new coordinate system: <strong>PC1</strong> and <strong>PC2</strong>.</p>
       </article>
 
-      <article class="scene" data-scene="6" data-viz="scatter" data-scatter-state="reveal">
+      <article class="scene" data-scene="5" data-viz="scatter" data-scatter-state="reveal">
         <h2>Project to two dimensions.</h2>
         <p>Each dot is one senator from the most recent Congress. We computed the projection without using <em>any</em> labels — no party, no state, no ideology. Just the raw votes.</p>
         <p>Look what comes out.</p>
       </article>
 
-      <article class="scene" data-scene="7" data-viz="scatter" data-scatter-state="party">
+      <article class="scene" data-scene="6" data-viz="scatter" data-scatter-state="party">
         <h2>The two clouds are the two parties.</h2>
         <p>PCA found them on its own. The leftmost dots are progressive Democrats — <em>Markey, Sanders, Warren</em>. The rightmost are conservative Republicans — <em>Cornyn, Lankford, McConnell</em>.</p>
         <p>The first principal component has a name. Everyone agrees on it: <strong>liberal–conservative</strong>.</p>
       </article>
 
-      <article class="scene" data-scene="8" data-viz="scatter" data-scatter-state="time">
+      <article class="scene" data-scene="7" data-viz="scatter" data-scatter-state="time">
         <h2>Now drag through 175 years.</h2>
         <p>Watch the cloud morph. In the 1930s the parties overlap heavily — a New Deal coalition crossed party lines. In the 1960s the second principal component spikes: Southern Democrats voted with Republicans on civil rights but with Democrats on everything else.</p>
         <p>By 2020 the two clouds have torn apart. There is almost no overlap.</p>
         <p class="hint">Use the slider, or press <kbd>↑</kbd>/<kbd>↓</kbd>.</p>
       </article>
 
-      <article class="scene" data-scene="9" data-viz="scree">
+      <article class="scene" data-scene="8" data-viz="scree">
         <h2>The eigenvalues themselves are evidence.</h2>
         <p>Compare the scree plot of the 88th Congress (1963, civil rights era) with the 119th (today).</p>
         <p>In 1963, the second eigenvalue is large — politics genuinely needed two dimensions. Today, the first eigenvalue swallows almost everything. <strong>Congress has become literally lower-dimensional.</strong></p>
       </article>
 
-      <article class="scene" data-scene="10" data-viz="kmeans">
+      <article class="scene" data-scene="9" data-viz="kmeans">
         <h2>Strip the colors. Run k-means.</h2>
         <p>We never told the algorithm what a party is. Two clusters, two random starting points, repeat until convergence.</p>
         <p>It rediscovers the parties — with an Adjusted Rand Index of essentially 1.0 in the modern era.</p>
       </article>
 
-      <article class="scene" data-scene="11" data-viz="boundary">
-        <h2>Every senator k-means gets &ldquo;wrong&rdquo; is famous.</h2>
-        <p>The handful of senators whose cluster doesn't match their party are exactly the ones political journalists write articles about.</p>
-        <p>The algorithm has no idea who they are. It just sees votes.</p>
+      <article class="scene" data-scene="10" data-viz="boundary">
+        <h2>The senators closest to the boundary are the famous ones.</h2>
+        <p>k-means rediscovers the parties almost perfectly — in the 119th Senate, every Democrat ends up in one cluster and every Republican in the other. <em>Nobody</em> is misclassified.</p>
+        <p>But not every senator sits an equal distance from the dividing line. The boundary between the two clusters runs roughly down the middle. The dots <strong>nearest that line</strong> — coloured by their actual party, as before — are the senators who vote across party lines most often. Murkowski (R), Paul (R), Fetterman (D), Gallego (D): all on their party's side, but only just.</p>
+        <p>These are the senators journalists call <em>swing votes</em>. The algorithm has no idea who they are; it just sees that their voting record sits closer to the other cluster's centroid than any of their colleagues do.</p>
       </article>
 
-      <article class="scene" data-scene="12" data-viz="importances">
+      <article class="scene" data-scene="11" data-viz="importances">
         <h2>Which votes most define the divide?</h2>
         <p>Train a Random Forest to predict party from votes. Look at the feature importances.</p>
         <p>The top votes aren't usually the famous, headline-grabbing ones. They're <em>procedural</em>: motions to table, cloture motions, motions to proceed. Procedural votes are nearly perfect party-line because they're about who controls the floor.</p>
       </article>
 
-      <article class="scene scene-outro" data-scene="13" data-viz="outro">
+      <article class="scene scene-outro" data-scene="12" data-viz="outro">
         <h2>Two numbers describe American politics.</h2>
         <p>The first one has a name. The fact that the second one is shrinking is itself news.</p>
         <p class="caption">Data: <a href="https://voteview.com/data">Voteview</a> — Poole, Rosenthal, Lewis et al.</p>
@@ -110,10 +106,6 @@
 
     </div>
   </main>
-
-  <nav class="scene-nav" id="scene-nav" aria-label="Scene navigation">
-    <button data-scene-target="1">1</button><button data-scene-target="2">2</button><button data-scene-target="3">3</button><button data-scene-target="4">4</button><button data-scene-target="5">5</button><button data-scene-target="6">6</button><button data-scene-target="7">7</button><button data-scene-target="8">8</button><button data-scene-target="9">9</button><button data-scene-target="10">10</button><button data-scene-target="11">11</button><button data-scene-target="12">12</button>
-  </nav>
 
   <script src="vendor/d3.v7.min.js"></script>
   <script src="vendor/scrollama.min.js"></script>

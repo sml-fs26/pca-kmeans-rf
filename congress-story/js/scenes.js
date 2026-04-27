@@ -171,121 +171,89 @@
     }
   }
 
-  // -------------------- SCENE 3: single bill --------------------
-  function renderSingleBill(ctx) {
+  // -------------------- SCENE 3: single senator --------------------
+  // PCA is on the rows of the vote matrix, so the natural unit is one senator.
+  // Pick a recognizable senator (Murkowski — also reappears in scene 10) and
+  // render her full 679-vote record as a horizontal strip: each cell is one bill.
+  function renderSingleSenator(ctx) {
     const { svg, overlay, readout, data } = ctx;
     clear(svg);
     clearOverlay(overlay);
     const m = data.matrix;
-    const billIdx = m.scene_3_bill;
-    const bill = m.bills[billIdx];
 
-    // Alphabetical row order, same as scene 2.
-    const order = m.senators.map((_, i) => i)
-      .sort((a, b) => m.senators[a].name.localeCompare(m.senators[b].name));
+    // Featured senator: Murkowski (R-AK). Falls back to row 0 if not found.
+    let rowIdx = m.senators.findIndex(s => /MURKOWSKI/i.test(s.name));
+    if (rowIdx < 0) rowIdx = 0;
+    const senator = m.senators[rowIdx];
+    const rowStr = m.matrix[rowIdx];
 
     let yeas = 0, nays = 0, abs = 0;
-    const cells = order.map(srcRow => {
-      const ch = m.matrix[srcRow].charCodeAt(billIdx);
-      if (ch === 121) { yeas++; return "yea"; }
-      if (ch === 110) { nays++; return "nay"; }
-      abs++; return "abs";
-    });
+    const cells = [];
+    for (let j = 0; j < m.n_bills; j++) {
+      const ch = rowStr.charCodeAt(j);
+      if (ch === 121) { yeas++; cells.push("yea"); }
+      else if (ch === 110) { nays++; cells.push("nay"); }
+      else { abs++; cells.push("abs"); }
+    }
 
+    const partyName = PARTY_FULL[senator.party] || senator.party;
     setReadout(readout, [
-      ["Bill", bill.bill_number || `RC ${bill.rollnumber}`],
-      ["Date", (bill.date || "").slice(0, 10)],
+      ["Senator", senator.name.split(",")[0]],
+      ["Party · State", `${partyName} · ${senator.state}`],
+      ["Bills (columns)", m.n_bills],
       ["Yea", yeas],
       ["Nay", nays],
       ["Absent", abs],
     ]);
 
     const { w, h } = dims(svg);
-    const root = d3.select(svg).append("g");
-    const N = cells.length;
-    const cellH = Math.min(24, (h - 80) / N);
-    const colW = 80;
-    const x0 = w / 2 - colW / 2;
-    const y0 = (h - cellH * N) / 2 + 12;
-
-    root.selectAll("rect").data(cells).enter().append("rect")
-      .attr("class", d => `matrix-cell ${d}`)
-      .attr("x", x0)
-      .attr("y", (d, i) => y0 + i * cellH)
-      .attr("width", colW)
-      .attr("height", cellH * 0.85)
-      .style("opacity", 0)
-      .transition().delay((d, i) => i * 8).duration(300).style("opacity", 0.9);
-
-    // Title — short summary of what the vote was about.
-    const desc = (bill.vote_desc || bill.vote_question || "").slice(0, 90);
-    root.append("text")
-      .attr("x", w / 2).attr("y", y0 - 22).attr("text-anchor", "middle")
-      .attr("class", "axis-label").text("ONE BILL → 100 SENATORS");
-    root.append("text")
-      .attr("x", w / 2).attr("y", y0 + cellH * N + 24).attr("text-anchor", "middle")
-      .attr("class", "axis-label")
-      .style("font-style", "italic").style("text-transform", "none")
-      .style("font-size", "11px")
-      .text(desc);
-  }
-
-  // -------------------- SCENE 4: two bills as axes --------------------
-  function renderTwoBills(ctx) {
-    const { svg, overlay, readout, data } = ctx;
-    clear(svg);
-    clearOverlay(overlay);
-    const m = data.matrix;
-    const [aIdx, bIdx] = m.scene_4_bills;
-    const billA = m.bills[aIdx];
-    const billB = m.bills[bIdx];
-
-    // Read each senator's vote on bills A and B from the real matrix.
-    const codeToVote = ch => ch === 121 ? 1 : ch === 110 ? -1 : 0;
-    const senators = m.senators.map((s, i) => ({
-      ...s,
-      va: codeToVote(m.matrix[i].charCodeAt(aIdx)),
-      vb: codeToVote(m.matrix[i].charCodeAt(bIdx)),
-    }));
-
-    setReadout(readout, [
-      ["Bill A", billA.bill_number || `RC ${billA.rollnumber}`],
-      ["Bill B", billB.bill_number || `RC ${billB.rollnumber}`],
-      ["Possible positions", "9"],
-      ["Dimensions kept", `2 of ${m.n_bills}`],
-    ]);
-
-    const { w, h } = dims(svg);
-    const margin = { top: 40, right: 40, bottom: 80, left: 60 };
+    const margin = { top: 56, right: 32, bottom: 56, left: 32 };
     const innerW = w - margin.left - margin.right;
-    const innerH = h - margin.top - margin.bottom;
-    const root = d3.select(svg).append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+    const stripH = 56;
+    const N = cells.length;
+    const cellW = innerW / N;
+    const x0 = margin.left;
+    const y0 = (h - stripH) / 2;
 
-    const xs = [-1, 0, 1];
-    const x = d3.scalePoint().domain(xs).range([0, innerW]).padding(0.5);
-    const y = d3.scalePoint().domain(xs).range([innerH, 0]).padding(0.5);
+    const root = d3.select(svg).append("g");
 
-    root.append("g").attr("class", "axis").attr("transform", `translate(0,${innerH})`)
-      .call(d3.axisBottom(x).tickFormat(d => d === 1 ? "Yea" : d === -1 ? "Nay" : "—"));
-    root.append("g").attr("class", "axis")
-      .call(d3.axisLeft(y).tickFormat(d => d === 1 ? "Yea" : d === -1 ? "Nay" : "—"));
-    root.append("text").attr("class", "axis-label").attr("text-anchor", "middle")
-      .attr("x", innerW / 2).attr("y", innerH + 36)
-      .text(`Bill A — ${(billA.vote_desc || "").slice(0, 50)}`);
-    root.append("text").attr("class", "axis-label").attr("text-anchor", "middle")
-      .attr("transform", `translate(-44,${innerH / 2}) rotate(-90)`)
-      .text(`Bill B — ${(billB.vote_desc || "").slice(0, 50)}`);
+    // Caption above the strip.
+    root.append("text")
+      .attr("x", w / 2).attr("y", y0 - 26).attr("text-anchor", "middle")
+      .attr("class", "axis-label")
+      .text(`ONE SENATOR → ${m.n_bills} BILLS`);
 
-    // Jitter to disambiguate overlapping dots.
-    const rng = mulberry32(7);
-    senators.forEach(s => { s._jx = (rng() - 0.5) * 50; s._jy = (rng() - 0.5) * 50; });
-    root.selectAll("circle").data(senators).enter().append("circle")
-      .attr("class", d => `dot ${partyClass(d.party)}`)
-      .attr("cx", d => x(d.va) + d._jx)
-      .attr("cy", d => y(d.vb) + d._jy)
-      .attr("r", 0)
-      .style("opacity", 0.7)
-      .transition().duration(500).attr("r", 6);
+    // The strip itself: one rect per bill.
+    root.selectAll("rect.matrix-cell").data(cells).enter().append("rect")
+      .attr("class", d => `matrix-cell ${d}`)
+      .attr("x", (d, i) => x0 + i * cellW)
+      .attr("y", y0)
+      .attr("width", Math.max(cellW * 0.95, 0.8))
+      .attr("height", stripH)
+      .style("opacity", 0)
+      .transition().delay((d, i) => i * 1.2).duration(220).style("opacity", 0.9);
+
+    // Senator label below the strip.
+    root.append("text")
+      .attr("x", w / 2).attr("y", y0 + stripH + 30).attr("text-anchor", "middle")
+      .attr("class", "axis-label")
+      .style("text-transform", "none")
+      .style("font-size", "13px")
+      .style("letter-spacing", "0.04em")
+      .text(`${senator.name.split(",")[0]} (${senator.party}-${senator.state})`);
+
+    // Vector framing: a delimiting bracket on each side, hinting at row→vector.
+    const bracket = 10;
+    root.append("path")
+      .attr("d", `M ${x0 - 4} ${y0 - bracket} L ${x0 - 12} ${y0 - bracket} L ${x0 - 12} ${y0 + stripH + bracket} L ${x0 - 4} ${y0 + stripH + bracket}`)
+      .attr("fill", "none").attr("stroke", "var(--ink-soft)").attr("stroke-width", 1)
+      .style("opacity", 0)
+      .transition().delay(N * 1.2).duration(300).style("opacity", 0.6);
+    root.append("path")
+      .attr("d", `M ${x0 + innerW + 4} ${y0 - bracket} L ${x0 + innerW + 12} ${y0 - bracket} L ${x0 + innerW + 12} ${y0 + stripH + bracket} L ${x0 + innerW + 4} ${y0 + stripH + bracket}`)
+      .attr("fill", "none").attr("stroke", "var(--ink-soft)").attr("stroke-width", 1)
+      .style("opacity", 0)
+      .transition().delay(N * 1.2).duration(300).style("opacity", 0.6);
   }
 
   // -------------------- SCENE 5: math --------------------
@@ -694,7 +662,10 @@
     }, 1000);
   }
 
-  // -------------------- SCENE 11: boundary inhabitants --------------------
+  // -------------------- SCENE 10: boundary / swing senators --------------------
+  // Honest framing: in the modern Senate, k-means perfectly recovers party (ARI=1.0),
+  // so nobody is *misclassified*. What varies is each senator's distance to the
+  // cluster boundary. The dots closest to that boundary are the swing senators.
   function renderBoundary(ctx) {
     const { svg, overlay, readout, data } = ctx;
     clear(svg);
@@ -704,23 +675,35 @@
     const c = data.byCongress.get(REFERENCE_CONGRESS);
     const senators = c.senators;
 
-    // Find centroids of each party (D, R) and rank by distance to the boundary
-    // (here: smallest |PC1 - midpoint between party means|).
-    const ds = senators.filter(s => s.party === "D");
-    const rs = senators.filter(s => s.party === "R");
-    if (!ds.length || !rs.length) return;
-    const dMean = d3.mean(ds, s => s.pc1);
-    const rMean = d3.mean(rs, s => s.pc1);
-    const mid = (dMean + rMean) / 2;
-    const ranked = senators.slice().sort((a, b) => Math.abs(a.pc1 - mid) - Math.abs(b.pc1 - mid));
-    const swing = ranked.slice(0, 8).map(s => s.bioguide || s.icpsr);
+    // Each senator has a cluster label from k-means. The boundary is the perpendicular
+    // bisector of the two cluster centroids in the 2D PCA plane — that's the line
+    // along which a point is equidistant from both centroids. We render it explicitly
+    // so "distance to boundary" becomes a thing the eye can measure.
+    const c0Pts = senators.filter(s => s.kmeans_cluster === 0);
+    const c1Pts = senators.filter(s => s.kmeans_cluster === 1);
+    if (!c0Pts.length || !c1Pts.length) return;
+    const cent0 = { x: d3.mean(c0Pts, s => s.pc1), y: d3.mean(c0Pts, s => s.pc2) };
+    const cent1 = { x: d3.mean(c1Pts, s => s.pc1), y: d3.mean(c1Pts, s => s.pc2) };
+    const mid = { x: (cent0.x + cent1.x) / 2, y: (cent0.y + cent1.y) / 2 };
+    // Direction from cent0 -> cent1, then the boundary is perpendicular to that.
+    const dx = cent1.x - cent0.x, dy = cent1.y - cent0.y;
+    const norm = Math.hypot(dx, dy) || 1;
+    const ux = dx / norm, uy = dy / norm;     // unit vector along centroid axis
+    const px = -uy, py = ux;                   // unit vector along boundary
+
+    // Signed distance from each senator to the boundary (along ux, uy).
+    senators.forEach(s => {
+      s._d = (s.pc1 - mid.x) * ux + (s.pc2 - mid.y) * uy;
+    });
+    const ranked = senators.slice().sort((a, b) => Math.abs(a._d) - Math.abs(b._d));
+    const swing = ranked.slice(0, 6).map(s => s.bioguide || s.icpsr);
     const swingSet = new Set(swing);
 
     setReadout(readout, [
       ["Congress", c.congress],
-      ["Distance to boundary", "ranked"],
-      ["Highlighted", swing.length],
-      ["These are", "the swing senators"],
+      ["k-means ARI", c.kmeans_ari == null ? "—" : c.kmeans_ari.toFixed(2)],
+      ["Misclassified", "0 of 100"],
+      ["Highlighted", `closest ${swing.length} to boundary`],
     ]);
 
     const { w, h } = dims(svg);
@@ -738,15 +721,38 @@
       .call(d3.axisBottom(x).ticks(6));
     root.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(6));
 
-    root.selectAll("circle").data(senators).enter().append("circle")
+    // The boundary line: midpoint ± large multiple of (px, py).
+    const L = Math.max(xMag, yMag) * 2;
+    root.append("line")
+      .attr("class", "boundary-line")
+      .attr("x1", x(mid.x - px * L)).attr("y1", y(mid.y - py * L))
+      .attr("x2", x(mid.x + px * L)).attr("y2", y(mid.y + py * L))
+      .attr("stroke", "#6b6b6b").attr("stroke-width", 1.2)
+      .attr("stroke-dasharray", "5 4")
+      .style("opacity", 0)
+      .transition().duration(500).style("opacity", 0.7);
+
+    // Boundary label.
+    root.append("text")
+      .attr("x", x(mid.x + px * L * 0.05) + 8).attr("y", y(mid.y + py * L * 0.05))
+      .attr("class", "axis-label").style("text-transform", "none")
+      .style("font-size", "11px").style("fill", "#6b6b6b")
+      .style("opacity", 0)
+      .text("cluster boundary")
+      .transition().delay(400).duration(500).style("opacity", 0.85);
+
+    // Senator dots — coloured by ACTUAL party (not cluster), so the user can see that
+    // party and cluster agree everywhere; what differs is distance to the boundary.
+    root.selectAll("circle.dot").data(senators).enter().append("circle")
       .attr("class", d => {
         const id = d.bioguide || d.icpsr;
-        return "dot " + partyClass(d.party) + (swingSet.has(id) ? " misclassified" : "");
+        return "dot " + partyClass(d.party) + (swingSet.has(id) ? " swing" : "");
       })
       .attr("cx", d => x(d.pc1)).attr("cy", d => y(d.pc2))
       .attr("r", d => swingSet.has(d.bioguide || d.icpsr) ? 9 : 5)
-      .style("opacity", d => swingSet.has(d.bioguide || d.icpsr) ? 1 : 0.4);
+      .style("opacity", d => swingSet.has(d.bioguide || d.icpsr) ? 1 : 0.35);
 
+    // Labels for the swing senators.
     root.selectAll("text.label").data(senators.filter(s => swingSet.has(s.bioguide || s.icpsr)))
       .enter().append("text")
       .attr("class", "dot label")
@@ -754,7 +760,7 @@
       .attr("y", d => y(d.pc2) + 4)
       .text(d => {
         const last = d.name.split(",")[0];
-        return `${last} (${d.state})`;
+        return `${last} (${d.party}-${d.state})`;
       });
   }
 
@@ -871,8 +877,7 @@
   global.SCENES = {
     grid: { enter: renderIntro },
     matrix: { enter: renderMatrix },
-    "single-bill": { enter: renderSingleBill },
-    "two-bills": { enter: renderTwoBills },
+    "single-senator": { enter: renderSingleSenator },
     math: { enter: renderMath },
     scatter: {
       enter(ctx, opts) {

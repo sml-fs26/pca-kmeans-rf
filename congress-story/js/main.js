@@ -57,11 +57,6 @@ async function loadAll() {
     const scene = window.SCENES[vizKind];
     if (scene && scene.enter) scene.enter(ctx, { sub });
 
-    // Update scene-nav active state.
-    document.querySelectorAll(".scene-nav button").forEach(b => {
-      b.classList.toggle("active", +b.dataset.sceneTarget === idx + 1);
-    });
-
     // Update URL hash without triggering scroll.
     const hash = `#scene-${idx + 1}`;
     if (location.hash !== hash) history.replaceState(null, "", hash);
@@ -114,11 +109,6 @@ async function loadAll() {
       scrollToScene(+e.key - 1);
       e.preventDefault();
     }
-  });
-
-  // Scene-nav clicks.
-  document.querySelectorAll(".scene-nav button").forEach(b => {
-    b.addEventListener("click", () => scrollToScene(+b.dataset.sceneTarget - 1));
   });
 
   // Hash routing on load.
