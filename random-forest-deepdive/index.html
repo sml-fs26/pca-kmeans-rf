@@ -81,9 +81,11 @@
       </article>
 
       <article class="scene" data-scene="8" data-viz="showdown" data-sub="reseeds">
-        <h2>Fifty trials. One tree vs. one forest.</h2>
-        <p>For fifty different random seeds, fit a deep tree and a 200-tree forest on a fresh spiral. Plot the test errors. The single tree is everywhere — its column smears across more than ten percentage points of error. The forest stays in a tight band less than half as wide.</p>
-        <p>The forest isn't perfect: spirals are intrinsically hard for axis-aligned splitters. But it's <em>stable</em>, and it's better on average. That's the trade.</p>
+        <h2>The diversity ladder.</h2>
+        <p>Fifty reseeds, three models on each. A deep single tree. A standard random forest, where each split picks from a random feature. And <em>extra-trees</em>, where the threshold is also picked at random.</p>
+        <p>Each rung adds one more dice roll. Each rung lowers the floor.</p>
+        <p>The single tree column is a wide cloud — sometimes lucky, sometimes terrible, almost three percentage points of standard deviation. RF cuts that variance roughly in half and shaves about six points off the average. Extra-trees adds a third source of randomness — the random thresholds — and shaves another six. From single tree to extra-trees: a twelve-point drop.</p>
+        <p>The principle is the variance formula for an averaged ensemble: <em>ρσ² + (1−ρ)/B · σ²</em>. Once you have enough trees the second term dies. The first — the floor — is set by tree correlation. More randomization → less correlation → lower floor. Until the bias takes over and trees genuinely can't draw a curve, no matter how many.</p>
       </article>
 
     </div>

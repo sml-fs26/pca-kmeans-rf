@@ -1,31 +1,37 @@
-// VIZ: showdown — owns scene 8 (reseeds).
+// VIZ: showdown — owns scene 8 (the diversity ladder).
 //
-// Pedagogical beat: across 50 different random seeds, a deep single tree's
-// test error scatters from ~7% to ~14% — wildly seed-dependent. A 200-tree
-// RF lands in a tight band ~7-10%. Same data, same model class, same labels.
-// The forest is just more reliable.
+// Three columns of test errors across 50 reseeds, each generated from a fresh
+// 100-point spiral (smaller than the master 200-point set used for scenes 1–7
+// — small N widens the gap between every rung):
 //
-// Top half:  side-by-side decision-boundary panels for one representative seed.
-//   - left:  single deep tree (RF.renderGridCells over sampleSingleBoundary)
-//   - right: 200-tree forest  (RF.renderProbCells over sampleRFProb)
-//   - moons scatter overlaid on both panels.
+//   single deep tree → standard RF → Extra-Trees
 //
-// Bottom half: strip plot of test errors for all 50 reseeds.
-//   - left column = single tree (50 dots, fill=var(--muted), jittered)
-//   - right column = RF (50 dots, fill=var(--ink), jittered)
-//   - mean ticks on each column; dashed connector shows the gap.
+// Each rung adds one form of randomization on top of the previous:
+//   - single tree:   no randomization. One bootstrap of the data; greedy splits.
+//   - RF (mtry=1):   bootstrap rows + random feature subset per split.
+//   - Extra-Trees:   bootstrap rows + random feature subset + RANDOM threshold.
 //
-// Color discipline: --muted vs --ink is the contrast. cluster-1/cluster-2
-// remain class-identity colors and are only used for the moons overlay.
+// More randomization → less inter-tree correlation → lower variance floor for
+// the bagged ensemble.
+//
+// Top half:  3 boundary panels for one representative seed.
+//   - left:    single deep tree (hard boundary, jagged staircase)
+//   - middle:  RF probability surface (smoother, but still rectangular)
+//   - right:   Extra-Trees probability surface (smoothest, closest to a spiral)
+//
+// Bottom half: strip plot, three columns of 50 dots each.
+//   - σ-band shaded behind each column
+//   - mean tick + connector between adjacent means with Δμ labels
 
 window.SCENES.showdown = (function () {
 
-  // Deterministic [-1, 1] jitter derived from an integer index. No Math.random.
+  // Deterministic [-1, 1] jitter from an integer index. No Math.random.
   function jitter(i) {
-    // Knuth-style multiplicative hash, then map to [-1, 1].
-    const h = ((i * 2654435761) >>> 0) / 4294967296; // [0, 1)
+    const h = ((i * 2654435761) >>> 0) / 4294967296;
     return h * 2 - 1;
   }
+
+  function fmtPct(x) { return (x * 100).toFixed(1) + '%'; }
 
   function enter(ctx, { sub, idx }) {
     const { svg, overlay, readout, controls } = ctx;
@@ -46,61 +52,55 @@ window.SCENES.showdown = (function () {
       return;
     }
 
-    // --- 3. SVG sizing (read bounding rect; do NOT hardcode) -------------
-    const stage = svg.parentElement; // .viz-stage
+    // --- 3. SVG sizing ----------------------------------------------------
+    const stage = svg.parentElement;
     const rect = stage.getBoundingClientRect();
-    const W = Math.max(360, Math.floor(rect.width || 720));
+    const W = Math.max(420, Math.floor(rect.width || 720));
     const H = Math.max(420, Math.floor(rect.height || 600));
 
     const sel = d3.select(svg)
       .attr('viewBox', `0 0 ${W} ${H}`)
       .attr('preserveAspectRatio', 'xMidYMid meet');
 
-    // Split the SVG vertically — top region for boundaries, bottom for strip.
     const TOP_FRAC = 0.46;
     const topH = Math.floor(H * TOP_FRAC);
     const botH = H - topH;
 
     // ---------------------------------------------------------------------
-    // 4. TOP HALF — two boundary panels side by side.
+    // 4. TOP HALF — three boundary panels.
     // ---------------------------------------------------------------------
-    const topGap = 16;
-    const topPadX = 16;
-    const topLabelH = 22;     // space for label above each panel
-    const panelW = (W - topPadX * 2 - topGap) / 2;
-    const panelH = topH - topLabelH - 12; // a bit of bottom padding
+    const topGap = 12;
+    const topPadX = 14;
+    const topLabelH = 22;
+    const N_PANELS = 3;
+    const panelW = (W - topPadX * 2 - topGap * (N_PANELS - 1)) / N_PANELS;
+    const panelH = topH - topLabelH - 12;
 
     const topG = sel.append('g').attr('class', 'sd-top');
 
-    // Flatten the precomputed nested arrays for the RF renderers.
     const singleArr = RF.flatten2D(S.sampleSingleBoundary);
     const rfProbArr = RF.flatten2D(S.sampleRFProb);
+    const etProbArr = S.sampleETProb ? RF.flatten2D(S.sampleETProb) : null;
 
-    function buildPanel(xOffset, label, drawCells, isProb) {
-      const px = topPadX + xOffset;
+    function buildPanel(panelIdx, label, drawCells) {
+      const px = topPadX + panelIdx * (panelW + topGap);
       const py = topLabelH;
 
-      const panelG = topG.append('g')
-        .attr('transform', `translate(${px},${py})`);
+      const panelG = topG.append('g').attr('transform', `translate(${px},${py})`);
 
-      // Frame.
       panelG.append('rect')
         .attr('class', 'mini-frame')
         .attr('x', 0).attr('y', 0)
         .attr('width', panelW).attr('height', panelH);
 
-      // Label above the frame.
       topG.append('text')
         .attr('class', 'mini-label')
-        .attr('x', px + 4)
-        .attr('y', py - 8)
+        .attr('x', px + 4).attr('y', py - 8)
         .text(label);
 
-      // Local scales for this panel.
       const scales = RF.makeScales(grid, panelW, panelH, 4, 4);
 
-      // Clip cells & points to the panel's interior.
-      const clipId = `sd-clip-${Math.round(px)}-${Math.round(py)}`;
+      const clipId = `sd-clip-${panelIdx}`;
       panelG.append('defs').append('clipPath')
         .attr('id', clipId)
         .append('rect')
@@ -110,7 +110,6 @@ window.SCENES.showdown = (function () {
       const cellsG = panelG.append('g').attr('clip-path', `url(#${clipId})`);
       drawCells(cellsG, scales);
 
-      // Moons scatter overlay.
       const ptsG = panelG.append('g').attr('clip-path', `url(#${clipId})`);
       ptsG.selectAll('circle.point')
         .data(moonsPts)
@@ -118,49 +117,60 @@ window.SCENES.showdown = (function () {
         .attr('class', d => `point cluster-${d.label + 1}`)
         .attr('cx', d => scales.x(d.x))
         .attr('cy', d => scales.y(d.y))
-        .attr('r', 2.4);
-
-      return { panelG, scales };
+        .attr('r', 1.6);
     }
 
     buildPanel(0, 'single deep tree', (g, s) => {
       RF.renderGridCells(g, singleArr, grid, s.x, s.y);
-    }, false);
-
-    buildPanel(panelW + topGap, '200-tree forest', (g, s) => {
+    });
+    buildPanel(1, '200-tree forest', (g, s) => {
       RF.renderProbCells(g, rfProbArr, grid, s.x, s.y);
-    }, true);
+    });
+    if (etProbArr) {
+      buildPanel(2, 'extra-trees forest', (g, s) => {
+        RF.renderProbCells(g, etProbArr, grid, s.x, s.y);
+      });
+    }
 
     // ---------------------------------------------------------------------
-    // 5. BOTTOM HALF — strip plot.
+    // 5. BOTTOM HALF — strip plot, three columns.
     // ---------------------------------------------------------------------
-    const botG = sel.append('g')
-      .attr('transform', `translate(0,${topH})`);
+    const botG = sel.append('g').attr('transform', `translate(0,${topH})`);
 
     const margin = { top: 56, right: 28, bottom: 48, left: 64 };
     const innerW = Math.max(160, W - margin.left - margin.right);
     const innerH = Math.max(120, botH - margin.top - margin.bottom);
+    const root = botG.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
-    const root = botG.append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    // Title above the strip plot. Anchor middle so it sits center-stage and
-    // doesn't run into the column headers, which sit above each column.
     botG.append('text')
       .attr('class', 'sd-title')
-      .attr('x', W / 2)
-      .attr('y', 18)
+      .attr('x', W / 2).attr('y', 18)
       .attr('text-anchor', 'middle')
-      .text('50 reseeds — error per seed');
+      .text('50 reseeds — error per fit. The diversity ladder.');
 
-    // Y scale: error rate, 0 to 0.18 (a hair above worst single-tree).
-    const yMax = 0.18;
+    // Y scale based on actual ladder range (single tree mean is ~32%, so plot up to ~40%).
+    const allErr = (S.singleTreeErr || [])
+      .concat(S.rfErr || [])
+      .concat(S.etErr || []);
+    const yMax = Math.max(0.05, ...allErr) * 1.08;
     const y = d3.scaleLinear().domain([0, yMax]).range([innerH, 0]);
 
-    // Two columns. Centers at 1/3 and 2/3 of innerW.
-    const colSingleX = innerW * 0.32;
-    const colRfX     = innerW * 0.68;
-    const halfColW   = Math.min(80, innerW * 0.15);
+    // Three column centers, evenly spaced.
+    const cols = [
+      { idx: 0, x: innerW * 0.18, label: 'single tree',
+        mean: S.singleTreeMean, std: S.singleTreeStd, errs: S.singleTreeErr || [],
+        bandClass: 'sigma-band single', meanClass: 'mean-line single', dotClass: 'dot-single' },
+      { idx: 1, x: innerW * 0.50, label: 'random forest',
+        mean: S.rfMean, std: S.rfStd, errs: S.rfErr || [],
+        bandClass: 'sigma-band rf', meanClass: 'mean-line', dotClass: 'dot-rf' },
+      { idx: 2, x: innerW * 0.82, label: 'extra-trees',
+        mean: S.etMean, std: S.etStd, errs: S.etErr || [],
+        bandClass: 'sigma-band et', meanClass: 'mean-line et', dotClass: 'dot-et' },
+    ];
+
+    const halfColW = Math.min(56, innerW * 0.10);
+    const tickHalf = halfColW * 0.85;
+    const JITTER_PX = Math.min(18, halfColW * 0.45);
 
     // Background grid.
     const gGrid = root.append('g').attr('class', 'sd-grid');
@@ -171,142 +181,117 @@ window.SCENES.showdown = (function () {
       .attr('y1', d => y(d)).attr('y2', d => y(d));
 
     // Y axis.
-    const yAxis = d3.axisLeft(y)
-      .ticks(6)
-      .tickFormat(d => `${(d * 100).toFixed(0)}%`);
+    const yAxis = d3.axisLeft(y).ticks(6).tickFormat(d => `${(d * 100).toFixed(0)}%`);
     root.append('g').attr('class', 'sd-axis').call(yAxis);
-
-    // Axis label.
     root.append('text')
       .attr('class', 'sd-axis-label')
       .attr('transform', `translate(-46,${innerH / 2}) rotate(-90)`)
       .attr('text-anchor', 'middle')
       .text('test error');
 
-    // Column headers (sit just above the plot area).
-    root.append('text')
-      .attr('class', 'col-header')
-      .attr('x', colSingleX).attr('y', -22)
-      .attr('text-anchor', 'middle')
-      .text('single tree');
-    root.append('text')
-      .attr('class', 'col-subtitle')
-      .attr('x', colSingleX).attr('y', -8)
-      .attr('text-anchor', 'middle')
-      .text(`μ = ${(S.singleTreeMean * 100).toFixed(1)}%   σ = ${(S.singleTreeStd * 100).toFixed(1)}%`);
-
-    root.append('text')
-      .attr('class', 'col-header')
-      .attr('x', colRfX).attr('y', -22)
-      .attr('text-anchor', 'middle')
-      .text('200-tree forest');
-    root.append('text')
-      .attr('class', 'col-subtitle')
-      .attr('x', colRfX).attr('y', -8)
-      .attr('text-anchor', 'middle')
-      .text(`μ = ${(S.rfMean * 100).toFixed(1)}%   σ = ${(S.rfStd * 100).toFixed(1)}%`);
-
-    // X-axis (just the two column anchors).
+    // X-axis line.
     const xLabelG = root.append('g')
       .attr('class', 'sd-axis')
       .attr('transform', `translate(0,${innerH})`);
     xLabelG.append('line')
       .attr('x1', 0).attr('x2', innerW)
       .attr('y1', 0).attr('y2', 0);
-    xLabelG.append('text')
-      .attr('class', 'sd-axis-label')
-      .attr('x', colSingleX).attr('y', 28)
-      .attr('text-anchor', 'middle')
-      .text('single tree');
-    xLabelG.append('text')
-      .attr('class', 'sd-axis-label')
-      .attr('x', colRfX).attr('y', 28)
-      .attr('text-anchor', 'middle')
-      .text('forest');
 
-    // ---- σ-bands behind each column (faint shaded rectangles) ----------
-    function drawSigmaBand(cx, mean, std, klass) {
-      const top = y(mean + std);
-      const bot = y(mean - std);
+    // Column headers + σ bands + dots + mean ticks.
+    cols.forEach(c => {
+      // Header.
+      root.append('text')
+        .attr('class', 'col-header')
+        .attr('x', c.x).attr('y', -22)
+        .attr('text-anchor', 'middle')
+        .text(c.label);
+      root.append('text')
+        .attr('class', 'col-subtitle')
+        .attr('x', c.x).attr('y', -8)
+        .attr('text-anchor', 'middle')
+        .text(`μ = ${fmtPct(c.mean)}   σ = ${fmtPct(c.std)}`);
+
+      // X-axis tick label.
+      xLabelG.append('text')
+        .attr('class', 'sd-axis-label')
+        .attr('x', c.x).attr('y', 28)
+        .attr('text-anchor', 'middle')
+        .text(c.label);
+
+      // σ band.
+      const top = y(c.mean + c.std);
+      const bot = y(c.mean - c.std);
       root.append('rect')
-        .attr('class', `sigma-band ${klass}`)
-        .attr('x', cx - halfColW).attr('y', top)
-        .attr('width', halfColW * 2).attr('height', Math.max(1, bot - top));
+        .attr('class', c.bandClass)
+        .attr('x', c.x - halfColW).attr('y', top)
+        .attr('width', halfColW * 2)
+        .attr('height', Math.max(1, bot - top));
+
+      // Dots.
+      root.append('g').selectAll(`circle.${c.dotClass}`)
+        .data(c.errs)
+        .enter().append('circle')
+        .attr('class', c.dotClass)
+        .attr('cx', (_, i) => c.x + jitter(i + 1 + c.idx * 1009) * JITTER_PX)
+        .attr('cy', d => y(d))
+        .attr('r', 3);
+
+      // Mean tick.
+      root.append('line')
+        .attr('class', c.meanClass)
+        .attr('x1', c.x - tickHalf).attr('x2', c.x + tickHalf)
+        .attr('y1', y(c.mean)).attr('y2', y(c.mean));
+    });
+
+    // Mean-to-mean connectors (single→RF, RF→ET).
+    function connectMeans(a, b) {
+      root.append('line')
+        .attr('class', 'mean-connector')
+        .attr('x1', a.x + tickHalf).attr('x2', b.x - tickHalf)
+        .attr('y1', y(a.mean)).attr('y2', y(b.mean));
+      const midX = (a.x + b.x) / 2;
+      const midY = (y(a.mean) + y(b.mean)) / 2;
+      const dpp = (a.mean - b.mean) * 100;
+      root.append('text')
+        .attr('class', 'mean-gap-label')
+        .attr('x', midX)
+        .attr('y', midY - 6)
+        .attr('text-anchor', 'middle')
+        .text(`Δμ = ${dpp.toFixed(1)}pp`);
     }
-    drawSigmaBand(colSingleX, S.singleTreeMean, S.singleTreeStd, 'single');
-    drawSigmaBand(colRfX,     S.rfMean,         S.rfStd,         'rf');
+    connectMeans(cols[0], cols[1]);
+    connectMeans(cols[1], cols[2]);
 
-    // ---- Dots ----------------------------------------------------------
-    const JITTER_PX = Math.min(22, halfColW * 0.55);
-    const single = S.singleTreeErr || [];
-    const rf     = S.rfErr || [];
-
-    root.append('g').selectAll('circle.dot-single')
-      .data(single)
-      .enter().append('circle')
-      .attr('class', 'dot-single')
-      .attr('cx', (_, i) => colSingleX + jitter(i + 1) * JITTER_PX)
-      .attr('cy', d => y(d))
-      .attr('r', 3);
-
-    root.append('g').selectAll('circle.dot-rf')
-      .data(rf)
-      .enter().append('circle')
-      .attr('class', 'dot-rf')
-      .attr('cx', (_, i) => colRfX + jitter(i + 1001) * JITTER_PX)
-      .attr('cy', d => y(d))
-      .attr('r', 3);
-
-    // ---- Mean tick marks -----------------------------------------------
-    const tickHalf = halfColW * 0.7;
-    root.append('line')
-      .attr('class', 'mean-line single')
-      .attr('x1', colSingleX - tickHalf).attr('x2', colSingleX + tickHalf)
-      .attr('y1', y(S.singleTreeMean)).attr('y2', y(S.singleTreeMean));
-    root.append('line')
-      .attr('class', 'mean-line')
-      .attr('x1', colRfX - tickHalf).attr('x2', colRfX + tickHalf)
-      .attr('y1', y(S.rfMean)).attr('y2', y(S.rfMean));
-
-    // ---- Dashed connector between the two means -------------------------
-    root.append('line')
-      .attr('class', 'mean-connector')
-      .attr('x1', colSingleX + tickHalf).attr('x2', colRfX - tickHalf)
-      .attr('y1', y(S.singleTreeMean)).attr('y2', y(S.rfMean));
-
-    // Mean-gap label, placed midway between the two means.
-    const gapMidX = (colSingleX + colRfX) / 2;
-    const gapMidY = (y(S.singleTreeMean) + y(S.rfMean)) / 2;
-    const gapPct = (S.singleTreeMean - S.rfMean) * 100;
-    root.append('text')
-      .attr('class', 'mean-gap-label')
-      .attr('x', gapMidX)
-      .attr('y', gapMidY - 6)
-      .attr('text-anchor', 'middle')
-      .text(`Δμ = ${gapPct.toFixed(1)}pp`);
-
-    // --- 6. Readout ------------------------------------------------------
+    // --- 6. Readout — six cells, one row each per metric -----------------
     readout.innerHTML = `
       <div class="readout-cell">
-        <span class="readout-label">single tree μ</span>
-        <span class="readout-value">${(S.singleTreeMean * 100).toFixed(1)}%</span>
+        <span class="readout-label">single μ</span>
+        <span class="readout-value">${fmtPct(S.singleTreeMean)}</span>
       </div>
       <div class="readout-cell">
-        <span class="readout-label">single tree σ</span>
-        <span class="readout-value">${(S.singleTreeStd * 100).toFixed(1)}%</span>
+        <span class="readout-label">single σ</span>
+        <span class="readout-value">${fmtPct(S.singleTreeStd)}</span>
       </div>
       <div class="readout-cell">
         <span class="readout-label">RF μ</span>
-        <span class="readout-value">${(S.rfMean * 100).toFixed(1)}%</span>
+        <span class="readout-value">${fmtPct(S.rfMean)}</span>
       </div>
       <div class="readout-cell">
         <span class="readout-label">RF σ</span>
-        <span class="readout-value">${(S.rfStd * 100).toFixed(1)}%</span>
+        <span class="readout-value">${fmtPct(S.rfStd)}</span>
+      </div>
+      <div class="readout-cell">
+        <span class="readout-label">extra-trees μ</span>
+        <span class="readout-value">${fmtPct(S.etMean)}</span>
+      </div>
+      <div class="readout-cell">
+        <span class="readout-label">extra-trees σ</span>
+        <span class="readout-value">${fmtPct(S.etStd)}</span>
       </div>
     `;
 
     // --- 7. Theme reactivity --------------------------------------------
-    function onThemeChange() { /* CSS variables handle re-coloring */ }
+    function onThemeChange() {}
     window.addEventListener('theme-change', onThemeChange);
     ctx.__showdownThemeListener = onThemeChange;
   }

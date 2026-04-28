@@ -25,16 +25,21 @@
  * existing .point + .cluster-N classes from style.css; nothing new here. */
 
 /* === Strip plot dots ================================================== */
-.dot-single { fill: var(--muted); fill-opacity: 0.7; }
-.dot-rf     { fill: var(--ink);   fill-opacity: 0.85; }
+/* Color discipline: single tree = muted, RF = ink, Extra-Trees = highlight (purple).
+   None of these encode class identity, so the cluster-1/2 palette stays free. */
+.dot-single { fill: var(--muted);    fill-opacity: 0.7; }
+.dot-rf     { fill: var(--ink);      fill-opacity: 0.85; }
+.dot-et     { fill: var(--highlight); fill-opacity: 0.9; }
 
 /* Sigma bands behind each column. */
 .sigma-band.single { fill: var(--muted);     fill-opacity: 0.10; }
 .sigma-band.rf     { fill: var(--ink);       fill-opacity: 0.07; }
+.sigma-band.et     { fill: var(--highlight); fill-opacity: 0.10; }
 
 /* Mean tick marks. */
 .mean-line        { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 0; }
 .mean-line.single { stroke: var(--muted); stroke-dasharray: 4 3; stroke-width: 2; }
+.mean-line.et     { stroke: var(--highlight); stroke-width: 2; }
 
 /* Dashed connector showing the mean gap. */
 .mean-connector {

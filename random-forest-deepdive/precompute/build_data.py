@@ -20,7 +20,8 @@ from pathlib import Path
 
 import numpy as np
 from scipy import stats
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
+from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
 
 # ---------------------------------------------------------------------------
 # Seeds and config
@@ -30,7 +31,8 @@ TEST_SEED = 999
 np.random.seed(SEED)
 
 # Spiral geometry. Two arms, n_turns each, radius from R_MIN to R_MAX.
-N_TRAIN = 200
+N_TRAIN = 200               # main training set for scenes 1–7
+N_TRAIN_SHOWDOWN = 100      # smaller for the showdown reseeds — widens the ladder gap
 N_TEST = 5000
 N_TURNS = 2.5
 R_MIN, R_MAX = 0.5, 4.0
@@ -407,52 +409,80 @@ print(f"Showdown: {SHOWDOWN_RESEEDS} reseeds...", flush=True)
 showdown_rng = np.random.RandomState(SEED + 9000)
 single_tree_errs = []
 rf_errs = []
+et_errs = []
 sample_single_boundary = None
 sample_rf_boundary = None
 sample_rf_prob = None
+sample_et_boundary = None
+sample_et_prob = None
 
 for r in range(SHOWDOWN_RESEEDS):
     seed_r = int(showdown_rng.randint(0, 2**31 - 1))
-    Xr, yr, _, _ = make_spiral(N_TRAIN, seed_r, FLIP_RATE)
+    Xr, yr, _, _ = make_spiral(N_TRAIN_SHOWDOWN, seed_r, FLIP_RATE)
 
+    # Single deep tree.
     st = DecisionTreeClassifier(max_depth=None, random_state=seed_r)
     st.fit(Xr, yr)
     st_err = float((st.predict(X_test) != y_test).mean())
     single_tree_errs.append(st_err)
 
+    # Random forest — manual loop so we can capture per-bootstrap grid votes.
     sub_rng = np.random.RandomState(seed_r ^ 0x55555555)
-    sub_grid_votes = np.zeros((NY, NX), dtype=np.int64) if r == 0 else None
-    sub_test_votes = np.zeros(N_TEST, dtype=np.int64)
+    rf_grid_votes = np.zeros((NY, NX), dtype=np.int64) if r == 0 else None
+    rf_test_votes = np.zeros(N_TEST, dtype=np.int64)
     for b in range(N_FOREST):
-        bidx = sub_rng.randint(0, N_TRAIN, size=N_TRAIN)
+        bidx = sub_rng.randint(0, N_TRAIN_SHOWDOWN, size=N_TRAIN_SHOWDOWN)
         tseed = int(sub_rng.randint(0, 2**31 - 1))
         clf = DecisionTreeClassifier(
             max_depth=None, max_features=MAX_FEATURES_FOREST, random_state=tseed,
         )
         clf.fit(Xr[bidx], yr[bidx])
-        sub_test_votes += clf.predict(X_test).astype(np.int64)
+        rf_test_votes += clf.predict(X_test).astype(np.int64)
         if r == 0:
-            sub_grid_votes += clf.predict(GRID_PTS).reshape(NY, NX).astype(np.int64)
-
-    rf_pred = (sub_test_votes / N_FOREST >= 0.5).astype(np.int64)
+            rf_grid_votes += clf.predict(GRID_PTS).reshape(NY, NX).astype(np.int64)
+    rf_pred = (rf_test_votes / N_FOREST >= 0.5).astype(np.int64)
     rf_errs.append(float((rf_pred != y_test).mean()))
+
+    # Extra-Trees — random feature AND random threshold per split, with bootstrap.
+    et = ExtraTreesClassifier(
+        n_estimators=N_FOREST,
+        max_features=MAX_FEATURES_FOREST,
+        max_depth=None,
+        bootstrap=True,
+        random_state=seed_r ^ 0xAAAAAAAA,
+    )
+    et.fit(Xr, yr)
+    et_pred = et.predict(X_test)
+    et_errs.append(float((et_pred != y_test).mean()))
 
     if r == 0:
         sample_single_boundary = grid_predict_class(st, GRID_PTS).tolist()
-        sample_rf_prob = (sub_grid_votes / N_FOREST).tolist()
+        sample_rf_prob = (rf_grid_votes / N_FOREST).tolist()
         sample_rf_boundary = (np.array(sample_rf_prob) >= 0.5).astype(np.int8).tolist()
+        # Extra-Trees probability surface from per-tree predictions (so it has the
+        # same fraction-of-trees-voting-class-1 semantics as the RF panel).
+        et_grid_votes = np.zeros((NY, NX), dtype=np.int64)
+        for tree in et.estimators_:
+            et_grid_votes += tree.predict(GRID_PTS).reshape(NY, NX).astype(np.int64)
+        sample_et_prob = (et_grid_votes / N_FOREST).tolist()
+        sample_et_boundary = (np.array(sample_et_prob) >= 0.5).astype(np.int8).tolist()
 
 showdown = {
     "nReseeds": SHOWDOWN_RESEEDS,
     "singleTreeErr": single_tree_errs,
     "rfErr": rf_errs,
+    "etErr": et_errs,
     "singleTreeMean": float(np.mean(single_tree_errs)),
     "singleTreeStd": float(np.std(single_tree_errs, ddof=1)),
     "rfMean": float(np.mean(rf_errs)),
     "rfStd": float(np.std(rf_errs, ddof=1)),
+    "etMean": float(np.mean(et_errs)),
+    "etStd": float(np.std(et_errs, ddof=1)),
     "sampleSingleBoundary": sample_single_boundary,
     "sampleRFBoundary": sample_rf_boundary,
     "sampleRFProb": sample_rf_prob,
+    "sampleETBoundary": sample_et_boundary,
+    "sampleETProb": sample_et_prob,
 }
 
 
@@ -490,8 +520,11 @@ disagree_rate = float((boundaries_arr != mode_grid).any(axis=0).mean())
 late = convergence["testErr"][-5:]
 plateau_range = max(late) - min(late)
 
-gap_pp = showdown["singleTreeMean"] - showdown["rfMean"]
-ratio = showdown["rfStd"] / showdown["singleTreeStd"]
+gap_st_rf = showdown["singleTreeMean"] - showdown["rfMean"]
+gap_st_et = showdown["singleTreeMean"] - showdown["etMean"]
+gap_rf_et = showdown["rfMean"] - showdown["etMean"]
+ratio_rf = showdown["rfStd"] / showdown["singleTreeStd"]
+ratio_et = showdown["etStd"] / showdown["singleTreeStd"]
 
 i20 = bisect.bisect_left(convergence["bs"], 20)
 oob_test_gap = float(np.mean(np.abs(
@@ -515,12 +548,14 @@ print(f"depth-20 testAcc         = {single_tree_metrics_by_depth['20']['testAcc'
 print(f"depth-20 train-test gap  = {gap_d20:.3f}")
 print(f"perturbation disagree    = {disagree_rate:.1%}")
 print(f"plateau range (last 5)   = {plateau_range:.3f}")
-print(f"showdown singleTree mean = {showdown['singleTreeMean']:.4f}")
-print(f"showdown singleTree std  = {showdown['singleTreeStd']:.4f}")
-print(f"showdown RF mean         = {showdown['rfMean']:.4f}")
-print(f"showdown RF std          = {showdown['rfStd']:.4f}")
-print(f"showdown gap (pp)        = {gap_pp*100:.1f}")
-print(f"showdown std ratio       = {ratio:.3f}")
+print(f"showdown singleTree mean = {showdown['singleTreeMean']:.4f}  std = {showdown['singleTreeStd']:.4f}")
+print(f"showdown RF mean         = {showdown['rfMean']:.4f}  std = {showdown['rfStd']:.4f}")
+print(f"showdown ExtraTrees mean = {showdown['etMean']:.4f}  std = {showdown['etStd']:.4f}")
+print(f"  ladder: ST → RF        = {gap_st_rf*100:.1f}pp")
+print(f"  ladder: RF → ET        = {gap_rf_et*100:.1f}pp")
+print(f"  ladder: ST → ET        = {gap_st_et*100:.1f}pp")
+print(f"  std ratio RF/ST        = {ratio_rf:.3f}")
+print(f"  std ratio ET/ST        = {ratio_et:.3f}")
 print(f"OOB-test gap (B>=20)     = {oob_test_gap:.4f}")
 print(f"pctOOB                   = {bootstrap_demo['stats']['pctOOB']:.4f}")
 print(f"Adversarial flips        = {n_flipped_train} of {N_TRAIN}")
@@ -533,18 +568,16 @@ assert single_tree_metrics_by_depth["1"]["testAcc"] < 0.65, \
 assert single_tree_metrics_by_depth["20"]["trainAcc"] >= 0.99
 assert gap_d20 > 0.20, f"train-test gap (got {gap_d20:.3f})"
 # High variance across reseeds: single tree's first-split commitment varies.
-assert disagree_rate > 0.30, f"perturbation disagreement (got {disagree_rate:.3f})"
+assert disagree_rate > 0.35, f"perturbation disagreement (got {disagree_rate:.3f})"
 # Convergence: forest beats single bootstrap-tree, plateau is reached.
 assert convergence["testErr"][-1] < convergence["testErr"][0]
-assert plateau_range < 0.03
-# Showdown: forest beats single tree by a clear margin AND has tighter variance.
-# The RAW gap is 5–6pp here because spirals are hard for both — but the variance
-# reduction is the headline (RF std about 0.4× single-tree std).
-assert gap_pp > 0.04, f"showdown gap pp (got {gap_pp:.3f})"
-assert ratio < 0.55, f"variance ratio (got {ratio:.3f})"
-# OOB story is muddied at this small N (training-point error stays elevated for the
-# whole forest, because bootstrap variance on 200 points is high). Loosen the
-# tracking invariant — what matters is that OOB CONVERGES, not that it matches test.
+assert plateau_range < 0.04
+# The diversity ladder. Each rung must be visible.
+assert gap_st_rf > 0.04, f"ST→RF gap too small (got {gap_st_rf:.3f})"
+assert gap_rf_et > 0.03, f"RF→ET gap too small (got {gap_rf_et:.3f})"
+assert gap_st_et > 0.10, f"ST→ET gap must be ≥ 10pp (got {gap_st_et*100:.1f}pp)"
+assert ratio_rf < 0.6, f"RF variance ratio (got {ratio_rf:.3f})"
+assert ratio_et < 0.6, f"ET variance ratio (got {ratio_et:.3f})"
 oob_drop = convergence["oobErr"][0] - convergence["oobErr"][-1]
 assert oob_drop > 0.05, f"OOB error must drop with B (got drop={oob_drop:.3f})"
 assert 0.30 < bootstrap_demo["stats"]["pctOOB"] < 0.42
@@ -599,7 +632,7 @@ print(f"Showdown: singleTree mean={showdown['singleTreeMean']:.4f} "
       f"std={showdown['singleTreeStd']:.4f}")
 print(f"          RF         mean={showdown['rfMean']:.4f} "
       f"std={showdown['rfStd']:.4f}")
-print(f"          gap = {gap_pp*100:.1f}pp ; std ratio = {ratio:.3f}")
+print(f"  ladder gap (ST→ET)   = {gap_st_et*100:.1f}pp")
 print(f"OOB-test gap (B>=20): {oob_test_gap:.4f}")
 print(f"Adversarial flips on training: {n_flipped_train} of {N_TRAIN}")
 print()
