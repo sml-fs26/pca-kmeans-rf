@@ -438,7 +438,61 @@ Then `Read` the PNGs. Combine with `&run` for animation scenes:
 
 Ignore stderr unless it contains `CONSOLE` or `JavaScript` — almost everything else is GPU/CVDisplayLink platform noise.
 
+The flag set above works on Chrome 100+. On Chrome 109+ you can also use `--headless=new` (the modern rendering path). If a headless run gives layout that disagrees with what `open index.html` shows interactively, swap `--headless` for `--headless=new` and re-screenshot — they sometimes diverge. Add `--no-sandbox --hide-scrollbars` if running in a container or CI.
+
 (Real example: a 16×12 heatmap in a PCA viz had column labels rotated -55° and clipped past the right edge by ~37px. Pure code review showed nothing. The screenshot showed it immediately, and one CSS edit fixed it.)
+
+**Open the PNG. Don't skip this.** A screenshot you don't open isn't verification — it's a file. The agent has no eyes; if you don't `Read` the image, you're back to fabricating descriptions of what *should* be there. This is a hard rule. The whole point of the screenshot is the moment you look at it.
+
+#### Multi-viewport — capture both lecture-hall and laptop sizes
+
+Many viz pages are taught on a projector and demoed on a laptop. Layout that survives 1280×800 can break at 1920×1080 (and vice versa: a sticky widget that sits below the fold on a laptop fills the projector's screen). Take both:
+
+```bash
+for w in "1280,800" "1920,1080"; do
+  "$CHROME" --headless --disable-gpu \
+    --window-size=$w \
+    --screenshot=/tmp/scene4_${w/,/x}.png \
+    "file:///abs/path/to/index.html#scene=4"
+done
+```
+
+If the layout collapses at one viewport, the fix usually goes in `style.css` (a `clamp()` on font-size, a min/max-width on a container) rather than per-scene. Don't ship until both look right.
+
+#### What headless screenshots catch reliably
+
+- Layout bugs: panel taller than viewport, items below the fold, sticky positioning broken.
+- CSS flex/grid auto-stretching of canvases (see "Lock canvas dimensions explicitly" in §Things to never do).
+- Text overflow, padding, color/contrast.
+- Scene-to-scene layout drift across the eight scenes.
+
+#### What headless screenshots catch poorly — bake a `?test=` hook in from day 1
+
+`requestAnimationFrame` doesn't run smoothly under headless. `--virtual-time-budget=N` advances JS time but RAF callbacks land mid-frame. Animations capture mid-pour, mid-fade, or barely started. **For physics demos and animated transitions, the layout will look correct live and broken in the screenshot — this is a tooling artifact, not a real bug.**
+
+Plain `--screenshot` also can't scroll, click, hover, or wait. If your viz drives state from `IntersectionObserver`, scroll position, or post-interaction state, the screenshot only sees the initial frame.
+
+The fix is to add a query-param test mode to the page from day 1 — same idea as the existing `&run` flag (see §`&run` flag for animation scenes), generalized:
+
+```js
+const params = new URLSearchParams(location.search);
+const test = params.get('test');
+if (test === 'revealed') {
+  // jump straight to the post-reveal state without simulating scroll
+  state.estimates.push(...DATA.demoEstimates);
+  state.truthRevealed = true;
+  render();
+}
+if (test === 'mid-anim') {
+  // freeze any t-driven animation at a known phase for capture
+  state.animT = 0.6;
+  render();
+}
+```
+
+Then `--screenshot` against `?test=revealed` and verify the post-state without simulating user input. **Two-line cost; pays back every iteration.** Like `&run`, this is a dev affordance, not a user feature — the canonical interaction stays the click/scroll. The flag exists so headless verification can reach states it otherwise can't.
+
+(Real story, learned painfully on a separate viz: a canvas with attribute `width="280" height="360"` was being silently stretched by its `flex-direction: column` parent's default `align-items: stretch`. The page looked perfect interactively because Chrome's regular renderer reflowed canvas content; under `--headless` the same canvas captured as a thin slice. Two days of "but it works on my machine" before someone read the PNG. Fix in §Things to never do.)
 
 #### Scrollytelling viz: hash routing alone won't scroll the viewport
 
@@ -494,6 +548,31 @@ If the screenshots still come back showing only the hero, the iframe-wrapper tri
 
 (Real example: building `random-forest-deepdive/` in a single fan-out, all 5 scene agents wasted 2–5 minutes each rediscovering this. The skill saving it once would have saved the whole batch ~15 minutes of duplicated trial-and-error.)
 
+### 4. When to graduate to Puppeteer / Playwright
+
+The bare `--screenshot` flag is enough for layout checks, color checks, and `?test=`-gated state checks. Don't add a headless-browser dependency until the cost has hit you twice.
+
+You've crossed the threshold when the verification pass needs any of:
+- Clicking a button and screenshotting the result
+- Scrolling to a specific position (beyond the iframe-wrapper trick)
+- Waiting for animations to settle before capture
+- Hover-state captures (tooltips, focus rings)
+- Console-log assertions or DOM-state assertions
+
+At that point: `npm i -g playwright` once, then a small helper that takes `(path, [(action, screenshot-name)])`. Resist building it speculatively — concrete pain twice over before adding it to the verification flow.
+
+## Verification checklist (the order matters)
+
+1. Edit the file.
+2. **Parse-check** every JS file you touched (§1).
+3. **Headless screenshot** at one or two viewports (§3).
+4. **Read** the PNG. Inspect.
+5. If a state needs verifying that requires interaction or scroll, add a `?test=` URL param and re-screenshot.
+6. Browser walkthrough in both themes (§2) for any non-trivial change.
+7. Only then commit + push.
+
+Step 4 — the agent actually looking at the screenshot — is what makes the rest work. Don't skip it. The "trust but verify" rule applies to your own work too.
+
 ## Things to never do
 
 - **Inline cluster/categorical colors** (`fill="#..."` in SVG, `style="color: #..."` in DOM). Use CSS classes (`.cluster-N`, `.voronoi-cell.cluster-N`) so theme switch works.
@@ -511,6 +590,15 @@ If the screenshots still come back showing only the hero, the iframe-wrapper tri
 - **Attach D3 click handlers in `.enter()` only** when the handler can change after first render. Apply `.on('click', …)` and `.style('cursor', …)` on the **merged** selection (`enter().merge(update)`), and re-render after swapping handlers. Otherwise existing nodes silently keep the original handler — or none at all.
 - **Reuse a group-identity color for a second encoding.** If category is encoded in red/blue, don't also use red for "important" elsewhere. Reserve a third hue.
 - **Use `Math.random()` directly in a precompute script.** Use a seeded RNG (Mulberry32). Otherwise the data quietly drifts every regeneration.
+- **Leave a `<canvas>` (or `<svg>` with intrinsic size) inside a flex/grid container without explicit CSS dimensions.** Default `align-items: stretch` will silently inflate or squash it — `width="280" height="360"` HTML attributes are *intrinsic* sizes; the browser still scales the layout box to its parent. The kicker: it often *renders fine interactively* (Chrome's main renderer reflows generously) and *captures wrong under headless* (the headless renderer respects the squashed box). Two-line fix:
+  ```css
+  .my-canvas {
+    width: 280px;          /* lock the layout box */
+    height: 360px;
+    flex: 0 0 auto;        /* don't let flex stretch us */
+  }
+  ```
+  Match the HTML attributes to the CSS values exactly. If you need a responsive canvas, pick a parent-relative `width: 100%` + `aspect-ratio` instead and pin `flex: 0 0 auto`. (Real story: a separate viz lost two days to "but it works on my machine" because the screenshot agent was capturing a thin slice while the live page looked correct — fixed by adding the three CSS lines above.)
 
 ## Recipe for a new viz
 
