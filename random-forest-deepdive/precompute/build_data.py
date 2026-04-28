@@ -36,7 +36,7 @@ N_TRAIN_SHOWDOWN = 100      # smaller for the showdown reseeds — widens the la
 N_TEST = 5000
 N_TURNS = 2.5
 R_MIN, R_MAX = 0.5, 4.0
-NOISE = 0.18
+NOISE = 0.10                # widens the showdown ladder (15.1pp at n=100 vs 12.3pp at noise=0.18)
 FLIP_RATE = 0.00
 N_ARMS = 2
 # Forest trees use max_features=1 (random feature per split) — standard RF diversity.
@@ -566,9 +566,9 @@ print("Asserting invariants...", flush=True)
 assert single_tree_metrics_by_depth["1"]["testAcc"] < 0.65, \
     f"depth-1 must clearly fail (got {single_tree_metrics_by_depth['1']['testAcc']:.3f})"
 assert single_tree_metrics_by_depth["20"]["trainAcc"] >= 0.99
-assert gap_d20 > 0.20, f"train-test gap (got {gap_d20:.3f})"
+assert gap_d20 > 0.10, f"train-test gap (got {gap_d20:.3f})"
 # High variance across reseeds: single tree's first-split commitment varies.
-assert disagree_rate > 0.35, f"perturbation disagreement (got {disagree_rate:.3f})"
+assert disagree_rate > 0.30, f"perturbation disagreement (got {disagree_rate:.3f})"
 # Convergence: forest beats single bootstrap-tree, plateau is reached.
 assert convergence["testErr"][-1] < convergence["testErr"][0]
 assert plateau_range < 0.04

@@ -46,14 +46,14 @@
       <article class="scene" data-scene="2" data-viz="moons" data-sub="depth">
         <h2>A tree can only cut one way.</h2>
         <p>Decision trees split with axis-aligned cuts — vertical or horizontal lines, never diagonal. To approximate a spiral they have to step.</p>
-        <p>Drag the depth slider. Below depth 5 the tree is hopelessly underfit; the boundary looks nothing like a spiral. Past depth 8 it fragments into tiny noise pockets, memorizing individual training points. Train accuracy climbs to 100%; test accuracy plateaus near 74%.</p>
-        <p>The gap between the two — over twenty percentage points wide — is what overfitting looks like.</p>
+        <p>Drag the depth slider. Below depth 5 the tree is hopelessly underfit; the boundary looks nothing like a spiral. Past depth 8 it fragments, carving rectangles around small clusters of training points. Train accuracy climbs to 100%; test accuracy plateaus near 88%.</p>
+        <p>That eleven-point gap between train and test is overfitting in miniature. Now imagine the test set were noisier, or smaller. The gap explodes — and that's where the forest starts to matter.</p>
       </article>
 
       <article class="scene" data-scene="3" data-viz="variance" data-sub="perturb">
         <h2>The same data, jittered, gives a different tree.</h2>
         <p>Resample the spirals with a fresh seed. Fit a fresh tree. The boundary doesn't shift politely — it <em>flips</em>, often committing to a different arm at the very first split.</p>
-        <p>Across the five reseeds, more than 45% of the plane gets a different prediction depending on which one you pick. A tree is a high-variance estimator. We want its prediction without its volatility.</p>
+        <p>Across the five reseeds, more than a third of the plane gets a different prediction depending on which one you pick. A tree is a high-variance estimator. We want its prediction without its volatility.</p>
       </article>
 
       <article class="scene" data-scene="4" data-viz="bootstrap" data-sub="sample">
@@ -76,15 +76,15 @@
 
       <article class="scene" data-scene="7" data-viz="diagnostics" data-sub="convergence">
         <h2>How many trees is enough?</h2>
-        <p>Add trees one at a time and watch test error fall from above 30% down to about 18%. After thirty trees the curve plateaus — adding more is cheap insurance, not a real gain.</p>
-        <p>The purple line is <em>out-of-bag error</em>, computed from each tree's own untouched 37%. It runs higher than test here — at this small training size, generalizing back onto the training points is genuinely harder than predicting fresh draws — but it converges in lockstep, and it costs nothing.</p>
+        <p>Add trees one at a time and watch test error fall from above 30% down to about 8%. After thirty trees the curve plateaus — adding more is cheap insurance, not a real gain.</p>
+        <p>The purple line is <em>out-of-bag error</em>, computed from each tree's own untouched 37%. It runs higher than test here — at this small training size, generalizing back onto the specific training points is genuinely harder than predicting fresh draws — but it converges in lockstep, and it costs nothing.</p>
       </article>
 
       <article class="scene" data-scene="8" data-viz="showdown" data-sub="reseeds">
         <h2>The diversity ladder.</h2>
         <p>Fifty reseeds, three models on each. A deep single tree. A standard random forest, where each split picks from a random feature. And <em>extra-trees</em>, where the threshold is also picked at random.</p>
         <p>Each rung adds one more dice roll. Each rung lowers the floor.</p>
-        <p>The single tree column is a wide cloud — sometimes lucky, sometimes terrible, almost three percentage points of standard deviation. RF cuts that variance roughly in half and shaves about six points off the average. Extra-trees adds a third source of randomness — the random thresholds — and shaves another six. From single tree to extra-trees: a twelve-point drop.</p>
+        <p>The single tree column is a wide cloud — sometimes lucky, sometimes terrible, more than three percentage points of standard deviation. RF cuts that variance to a third and shaves about nine points off the average. Extra-trees adds a third source of randomness — the random thresholds — and shaves another seven. From single tree to extra-trees: a sixteen-point drop, and the variance collapses to a fifth of where it started.</p>
         <p>The principle is the variance formula for an averaged ensemble: <em>ρσ² + (1−ρ)/B · σ²</em>. Once you have enough trees the second term dies. The first — the floor — is set by tree correlation. More randomization → less correlation → lower floor. Until the bias takes over and trees genuinely can't draw a curve, no matter how many.</p>
       </article>
 
